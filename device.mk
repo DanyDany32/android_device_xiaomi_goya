@@ -263,6 +263,7 @@ PRODUCT_PACKAGES += \
     GoyaFrameworksOverlay \
     GoyaSecureElementOverlay \
     GoyaSettingsOverlay \
+    GoyaSettingsProviderOverlay \
     GoyaSystemUIOverlay
 
 PRODUCT_PACKAGES += \
