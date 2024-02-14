@@ -2357,11 +2357,9 @@ odm/etc/thermal-tgame.conf
 odm/etc/thermal-video.conf
 odm/etc/thermal-videochat.conf
 odm/etc/thermal-yuanshen.conf
-vendor/bin/hw/android.hardware.thermal-service.mediatek
 vendor/bin/mi_thermald
 vendor/bin/thermal_core
 vendor/etc/init/init.thermal_core.rc
-vendor/etc/init/thermal-mediatek.rc
 vendor/etc/thermal/disable_skin_control.conf
 vendor/etc/thermal/disable_thermal.conf
 vendor/etc/thermal/disable_thermal_temp.conf
@@ -2380,7 +2378,6 @@ vendor/etc/thermal/thermal_policy_03.conf
 vendor/etc/thermal/thermal_policy_08.conf
 vendor/etc/thermal/thermal_policy_09.conf
 vendor/etc/thermal/thermal_policy_10.conf
-vendor/etc/vintf/manifest/thermal-mediatek.xml
 vendor/etc/mpe.conf
 vendor/etc/thermal-map.conf
 vendor/etc/thermalbreakboostconfig.xml
