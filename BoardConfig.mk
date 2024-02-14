@@ -37,7 +37,7 @@ BOARD_BOOTCONFIG += androidboot.console=0
 BOARD_BOOTCONFIG += androidboot.selinux=permissive
 BOARD_KERNEL_CMDLINE += bootopt=64S3,32N2,64N2
 BOARD_KERNEL_CMDLINE += kasan=off
-BOARD_KERNEL_CMDLINE += rcupdate.rcu_expedited=1
+BOARD_KERNEL_CMDLINE += rcupdate.rcu_expedited=1 rcutree.enable_rcu_lazy
 
 BOARD_INIT_BOOT_HEADER_VERSION := 4
 
