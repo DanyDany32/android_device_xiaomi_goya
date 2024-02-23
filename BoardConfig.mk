@@ -36,6 +36,7 @@ BOARD_RAMDISK_USE_LZ4 := true
 BOARD_BOOTCONFIG += androidboot.console=0
 BOARD_BOOTCONFIG += androidboot.selinux=permissive
 BOARD_KERNEL_CMDLINE += bootopt=64S3,32N2,64N2
+BOARD_KERNEL_CMDLINE += kasan=off
 
 BOARD_INIT_BOOT_HEADER_VERSION := 4
 
