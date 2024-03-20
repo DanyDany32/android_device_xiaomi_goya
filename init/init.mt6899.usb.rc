@@ -385,6 +385,8 @@ on boot
     # force on usb
     # write /sys/class/udc/${sys.usb.controller}/device/mode 3
 
+    setprop sys.usb.controller "11201000.usb0"
+
     # Set permissions for USB service
     chown root system /sys/class/typec/port0/power_role
     chown root system /sys/class/typec/port0/data_role
@@ -397,7 +399,6 @@ on boot
     chmod 664 /sys/class/udc/${sys.usb.controller}/device/mode
     chmod 664 /sys/class/udc/${sys.usb.controller}/device/saving
 
-    setprop sys.usb.controller "11201000.usb0"
     setprop sys.usb.configfs 2
 
 on charger
