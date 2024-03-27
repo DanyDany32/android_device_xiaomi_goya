@@ -284,7 +284,8 @@ PRODUCT_PACKAGES += \
     GoyaSystemUIOverlay
 
 PRODUCT_PACKAGES += \
-    GoyaApertureOverlay
+    GoyaApertureOverlay \
+    GoyaLineageSettingsOverlay
 
 PRODUCT_PACKAGES += \
     NcmTetheringOverlay
