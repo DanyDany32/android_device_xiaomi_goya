@@ -258,6 +258,9 @@ PRODUCT_COPY_FILES += \
 # Overlays
 $(call inherit-product, hardware/mediatek/overlay/mssi.mk)
 
+PRODUCT_PACKAGES += \
+    NcmTetheringOverlay
+
 # Page size
 PRODUCT_NO_BIONIC_PAGE_SIZE_MACRO := true
 
