@@ -185,6 +185,7 @@ PRODUCT_PACKAGES += \
     init.cgroup.rc \
     init.connectivity.common.rc \
     init.connectivity.rc \
+    init.fingerprint.rc \
     init.mi_thermald.rc \
     init.modem.rc \
     init.mt6899.rc \
