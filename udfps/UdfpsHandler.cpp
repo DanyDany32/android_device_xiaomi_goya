@@ -210,6 +210,7 @@ class XiaomiOnyxUdfpsHandler : public UdfpsHandler {
     }
 
     void onFingerDown(uint32_t /*x*/, uint32_t /*y*/, float /*minor*/, float /*major*/) {
+        if (mAuthSuccess) return;
         LOG(INFO) << __func__;
         // Ensure touchscreen is aware of the press state, ideally this is not needed
         setFingerDown(true);
@@ -260,10 +261,20 @@ class XiaomiOnyxUdfpsHandler : public UdfpsHandler {
         LOG(INFO) << __func__;
     }
 
+    void onAuthenticationSucceeded() {
+        mAuthSuccess = true;
+        onFingerUp();
+        std::thread([this]() {
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            mAuthSuccess = false;
+        }).detach();
+    }
+
   private:
     fingerprint_device_t* mDevice;
     android::base::unique_fd touch_fd_;
     android::base::unique_fd disp_fd_;
+    bool mAuthSuccess = false;
 
     void setFodStatus(int value) {
         ioctl(touch_fd_.get(), TOUCH_IOC_SELECT_TOUCH_ID, MI_DISP_PRIMARY);
