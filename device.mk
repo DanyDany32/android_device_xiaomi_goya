@@ -261,6 +261,7 @@ $(call inherit-product, hardware/mediatek/overlay/mssi.mk)
 PRODUCT_PACKAGES += \
     GoyaCarrierConfigOverlay \
     GoyaFrameworksOverlay \
+    GoyaNfcOverlay \
     GoyaSecureElementOverlay \
     GoyaSettingsOverlay \
     GoyaSettingsProviderOverlay \
