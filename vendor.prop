@@ -399,6 +399,7 @@ vendor.connsys.driver.ready=no
 
 # Sensors
 ro.vendor.mtk.sensor.support=yes
+ro.vendor.sensors.xiaomi.udfps=true
 
 # Trace
 debug.atrace.tags.enableflags=0x4040e
