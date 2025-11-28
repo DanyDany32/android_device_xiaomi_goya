@@ -6,6 +6,8 @@
 
 from extract_utils.file import File
 from extract_utils.fixups_blob import (
+    BlobFixupCtx,
+    File,
     blob_fixup,
     blob_fixups_user_type,
 )
@@ -17,12 +19,43 @@ from extract_utils.main import (
     ExtractUtils,
     ExtractUtilsModule,
 )
+from extract_utils.tools import (
+    llvm_objdump_path,
+)
+from extract_utils.utils import (
+    run_cmd,
+)
 
 namespace_imports = [
     'device/xiaomi/goya',
     'hardware/mediatek',
     'hardware/xiaomi',
 ]
+
+
+def blob_fixup_graphic_buffer_size(
+    ctx: BlobFixupCtx,
+    file: File,
+    file_path: str,
+    *args,
+    **kwargs,
+):
+    for line in run_cmd(
+        [
+            llvm_objdump_path,
+            '--disassemble-all',
+            file_path,
+        ]
+    ).splitlines():
+        line = line.split(maxsplit=5)
+        if len(line) != 6:
+            continue
+        # The size of GraphicBuffer changed from 0x100 to 0xd30
+        offset, _, instruction, register, value, _ = line
+        if instruction == 'mov' and register[:-1] == 'w0' and value == '#0x100':
+            with open(file_path, 'rb+') as f:
+                f.seek(int(offset[:-1], 16))
+                f.write(b'\x00\xa6\x81\x52')  # AArch64 mov w0, #0xd30
 
 
 def lib_fixup_vendor_suffix(lib: str, partition: str, *args, **kwargs):
@@ -104,7 +137,6 @@ blob_fixups: blob_fixups_user_type = {
         'vendor/lib64/lib_power_applist.so',
         'vendor/lib64/libaudiocloudctrl.so',
         'vendor/lib64/libmicamera_aidl_provider.so',
-        'vendor/lib64/libmicamera_hal_core.so',
         'vendor/lib64/libpowerhal.so',
         'vendor/lib64/libpqxmlflagparser.so',
         'vendor/lib64/libpqxmlparser.so',
@@ -138,7 +170,6 @@ blob_fixups: blob_fixups_user_type = {
         'vendor/lib64/hw/mt6899/android.hardware.graphics.allocator-V2-mediatek.so',
         'vendor/lib64/hw/mt6899/mapper.mediatek.so',
         'vendor/lib64/mt6899/libmtkcam_grallocutils.so',
-        'vendor/lib64/libcodec2_fsr.so',
         'vendor/lib64/libcodec2_vpp_AIMEMC_plugin.so',
         'vendor/lib64/libcodec2_vpp_AISR_plugin.so',
         'vendor/lib64/libgpud.so',
@@ -184,10 +215,18 @@ blob_fixups: blob_fixups_user_type = {
         .replace_needed('libaudio_aidl_conversion_common_ndk.so', 'libaudio_aidl_conversion_common_ndk_prebuilt.so'),
     'vendor/lib64/libaudio_aidl_conversion_common_ndk_prebuilt.so': blob_fixup()
         .replace_needed('android.media.audio.common.types-V5-ndk.so', 'android.media.audio.common.types-V3-ndk.so'),
+    'vendor/lib64/libcodec2_fsr.so': blob_fixup()
+        .call(blob_fixup_graphic_buffer_size)
+        .replace_needed('android.hardware.graphics.common-V5-ndk.so', 'android.hardware.graphics.common-V7-ndk.so'),
+    'vendor/lib64/libcom.xiaomi.grallocutils.so': blob_fixup()
+        .call(blob_fixup_graphic_buffer_size),
     'vendor/lib64/libkeymint_V3.so': blob_fixup()
         .replace_needed('lib_android_keymaster_keymint_utils.so', 'lib_android_keymaster_keymint_utils_V3.so'),
     'vendor/lib64/libkeymint_remote_prov_support_V3.so': blob_fixup()
         .replace_needed('libbase.so', 'libbase-v35.so'),
+    'vendor/lib64/libmicamera_hal_core.so': blob_fixup()
+        .call(blob_fixup_graphic_buffer_size)
+        .replace_needed('libtinyxml2.so', 'libtinyxml2-v34.so'),
     'vendor/lib64/libultrahdr-v35.so': blob_fixup()
         .replace_needed('libjpegdecoder.so', 'libjpegdecoder-v35.so')
         .replace_needed('libjpegencoder.so', 'libjpegencoder-v35.so'),
