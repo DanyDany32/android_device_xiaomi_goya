@@ -56,7 +56,9 @@ ro.boot.hypervisor.vm.supported=1
 # Bluetooth
 ro.bluetooth.a2dp_offload.supported=true
 ro.bluetooth.leaudio_offload.supported=true
+persist.bluetooth.a2dp_offload.coex_buf_count=3
 persist.bluetooth.a2dp_offload.disabled=false
+persist.bluetooth.a2dp_offload.mtk_coex=true
 persist.bluetooth.leaudio_offload.disabled=false
 persist.vendor.bluetooth.leaudio_mode=ums-cg
 
