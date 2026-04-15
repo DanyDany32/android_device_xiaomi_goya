@@ -152,6 +152,8 @@ blob_fixups: blob_fixups_user_type = {
     'vendor/bin/hw/android.hardware.security.keymint@3.0-service.mitee': blob_fixup()
         .replace_needed('lib_android_keymaster_keymint_utils.so', 'lib_android_keymaster_keymint_utils_V3.so')
         .replace_needed('libkeymint.so', 'libkeymint_V3.so'),
+    'vendor/etc/init/hw/init.batterysecret.rc': blob_fixup()
+        .regex_replace('    seclabel u:r:batterysecret:s0\n', ''),
     'vendor/etc/vintf/manifest/manifest_media_c2_default.xml': blob_fixup()
         .regex_replace('    <fqname>IComponentStore/dolby</fqname>\n', ''),
     'vendor/lib64/hw/android.hardware.audio.effect.aidl-impl-mediatek.so': blob_fixup()
