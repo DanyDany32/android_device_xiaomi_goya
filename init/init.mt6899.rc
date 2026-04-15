@@ -68,7 +68,6 @@ on late-init
 # mount different fs start
 
 on charger
-
     exec /system/bin/e2fsck -f -p /dev/block/by-name/cache
     mount ext4 /dev/block/by-name/cache /cache rw wait
     chmod 0660 /dev/spm
@@ -1305,13 +1304,6 @@ service osi /system/bin/osi
     disabled
     oneshot
     #seclabel u:r:osi:s0
-
-service charger /system/bin/charger
-    class charger
-    critical
-    seclabel u:r:charger:s0
-    group system graphics
-    #seclabel u:r:healthd:s0
 
 # mount debugfs on user-root
 on late-init && property:ro.build.type=user && property:ro.debuggable=1
