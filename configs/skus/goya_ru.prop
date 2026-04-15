@@ -1,0 +1,4 @@
+ro.odm.build.fingerprint=Xiaomi/goya_eea/goya:16/BP2A.250605.031.A3/OS3.0.10.0.WOEEUXM:user/release-keys
+ro.vendor.build.fingerprint=Xiaomi/goya_eea/goya:16/BP2A.250605.031.A3/OS3.0.10.0.WOEEUXM:user/release-keys
+ro.product.name_for_attestation=goya_ru
+ro.product.odm.name=goya_ru
