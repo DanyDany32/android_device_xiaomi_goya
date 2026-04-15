@@ -259,6 +259,13 @@ PRODUCT_COPY_FILES += \
 $(call inherit-product, hardware/mediatek/overlay/mssi.mk)
 
 PRODUCT_PACKAGES += \
+    GoyaCarrierConfigOverlay \
+    GoyaFrameworksOverlay \
+    GoyaSecureElementOverlay \
+    GoyaSettingsOverlay \
+    GoyaSystemUIOverlay
+
+PRODUCT_PACKAGES += \
     NcmTetheringOverlay
 
 # Page size
