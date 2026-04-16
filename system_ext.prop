@@ -10,6 +10,7 @@ sys.brightness.disable_gamma_conversion=true
 
 # Radio
 ro.fota.oem=Xiaomi
+ro.vendor.imeisv=13
 ro.vendor.mtk_gwsd_support=1
 ro.vendor.mtk_telephony_add_on_policy=0
 ro.vendor.vodata_support=1
