@@ -50,8 +50,6 @@ vendor.streamin.pcm.dump=0
 
 # AVF
 avf.remote_attestation.enabled=0
-ro.boot.hypervisor.version=GenieZone
-ro.boot.hypervisor.vm.supported=1
 
 # Bluetooth
 ro.bluetooth.a2dp_offload.supported=true
