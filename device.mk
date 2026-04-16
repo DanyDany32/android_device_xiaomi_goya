@@ -267,6 +267,9 @@ PRODUCT_PACKAGES += \
     GoyaSystemUIOverlay
 
 PRODUCT_PACKAGES += \
+    GoyaApertureOverlay
+
+PRODUCT_PACKAGES += \
     NcmTetheringOverlay
 
 # Page size
