@@ -7,9 +7,9 @@ vendor/lib64/libladder.so
 
 # Audio
 odm/lib64/vendor.xiaomi.hardware.mediaeventgatherservice-V1-ndk.so
+system/lib64/av-audio-types-aidl-ndk.so:system/lib64/av-audio-types-aidl-V3-ndk.so;FIX_SONAME
 system_ext/bin/hw/android.hardware.audio.parameter_parser.service
 system_ext/etc/init/android.hardware.audio.parameter_parser.service.rc
-system/lib64/av-audio-types-aidl-ndk.so:system/lib64/av-audio-types-aidl-V3-ndk.so;FIX_SONAME
 vendor/bin/hw/android.hardware.audio.service-aidl.mediatek
 vendor/etc/audio_param/AudioParamOptions_mgvi.xml
 vendor/etc/audio_param/AudioParamOptions_vext.xml
@@ -2408,12 +2408,12 @@ odm/bin/hw/vendor.xiaomi.hw.touchfeature-service
 odm/bin/touch_report_debug
 odm/bin/toucheventcheck
 odm/etc/init/vendor.xiaomi.hw.touchfeature-service.rc
-odm/etc/init.panel_info.sh
 odm/etc/touch/dynamicrate.json
 odm/etc/touch/gameturbotool-control.json
 odm/etc/touch/gameturbotool-fastinput.json
 odm/etc/touch/gameturbotool.json
 odm/etc/vintf/manifest/vendor.xiaomi.hw.touchfeature-service.xml
+odm/etc/init.panel_info.sh
 odm/lib64/libtensorflowlite_touch_c.so
 odm/lib64/libtouchreport.so
 odm/lib64/libtouchreport_alg.so
