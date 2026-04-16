@@ -1549,6 +1549,10 @@ vendor/firmware/lib3a.ccu_dummy
 vendor/firmware/v1_fac_fld_coef.bin
 vendor/firmware/v1_fac_fld_config.bin
 
+# Camera - CameraX extensions
+vendor/etc/permissions/camera_extensions.xml
+vendor/framework/androidx.camera.extensions.impl.jar
+
 # Camera - SQLiteModule database
 odm/bin/crossbuild/DataSet/SQLiteModule/db/ae/mt6899/ParameterDB_ae.db;SYMLINK=odm/bin/crossbuild/DataSet/SQLiteModule/db/ae/ParameterDB_ae.db;MAKE_COPY_RULE_ONLY
 odm/bin/crossbuild/DataSet/SQLiteModule/db/af/mt6899/ParameterDB_af.db;SYMLINK=odm/bin/crossbuild/DataSet/SQLiteModule/db/af/ParameterDB_af.db;MAKE_COPY_RULE_ONLY

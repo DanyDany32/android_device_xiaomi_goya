@@ -81,6 +81,7 @@ persist.vendor.camera3.pipeline.bufnum.min.low_ram.rsso=5
 persist.vendor.camera3.pipeline.bufnum.min.low_ram.rrzo=5
 persist.vendor.mifaced.fastlaunch=1
 ro.camera.disableHeicUltraHDR=true
+ro.camerax.extensions.enabled=true
 ro.usb.uvc.enabled=false
 ro.vendor.afbc.enable=3
 ro.vendor.camera.directfdyuv.support=1
