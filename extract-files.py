@@ -29,6 +29,7 @@ from extract_utils.utils import (
 namespace_imports = [
     'device/xiaomi/goya',
     'hardware/mediatek',
+    'hardware/mediatek/libmtkperf_client',
     'hardware/xiaomi',
 ]
 
@@ -140,10 +141,8 @@ blob_fixups: blob_fixups_user_type = {
         'vendor/lib64/hw/audio.primary.mediatek.so',
         'vendor/lib64/hw/mt6899/vendor.mediatek.hardware.pq_aidl-impl.so',
         'vendor/lib64/libHardwareBacklightcore.so',
-        'vendor/lib64/lib_power_applist.so',
         'vendor/lib64/libaudiocloudctrl.so',
         'vendor/lib64/libmicamera_aidl_provider.so',
-        'vendor/lib64/libpowerhal.so',
         'vendor/lib64/libpqxmlflagparser.so',
         'vendor/lib64/libpqxmlparser.so',
         'vendor/lib64/librt_extamp_intf.so',

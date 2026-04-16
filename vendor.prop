@@ -326,10 +326,6 @@ ro.vendor.mediatek.version.branch=alps-mp-v0.mp1.tc8sp4
 ro.vendor.mediatek.version.release=alps-mp-v0.mp1.tc8sp4-V1
 ro.vendor.mgk_name=mgk_64_k66
 
-# Power
-persist.system.powerhal.applist_enable=1
-ro.vendor.magt.mtk_magt_support=1
-
 # Radio
 persist.radio.multisim.config=dsds
 persist.vendor.connsys.chipid=-1

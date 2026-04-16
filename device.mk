@@ -301,6 +301,18 @@ PRODUCT_PACKAGES += \
 # Platform
 TARGET_BOARD_PLATFORM := mt6899
 
+# Power
+PRODUCT_PACKAGES += \
+    android.hardware.power-service.lineage-libperfmgr \
+    libmtkperf_client \
+    libmtkperf_client_vendor \
+    libperfctl_vendor \
+    libpowerhalwrap \
+    libpowerhalwrap_vendor
+
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/configs/power/powerhint.json:$(TARGET_COPY_OUT_VENDOR)/etc/powerhint.json
+
 # Radio
 ENABLE_VENDOR_RIL_SERVICE := true
 
@@ -343,7 +355,11 @@ PRODUCT_COPY_FILES += \
 # Soong namespaces
 PRODUCT_SOONG_NAMESPACES += \
     $(LOCAL_PATH) \
+    hardware/google/interfaces \
+    hardware/google/pixel \
+    hardware/lineage/interfaces/power-libperfmgr \
     hardware/mediatek \
+    hardware/mediatek/libmtkperf_client \
     hardware/mediatek/wlan/wifi_hal \
     hardware/xiaomi
 
