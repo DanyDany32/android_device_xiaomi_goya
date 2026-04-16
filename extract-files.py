@@ -209,14 +209,6 @@ blob_fixups: blob_fixups_user_type = {
         'vendor/lib64/libcameraopt.so'
     ): blob_fixup()
         .add_needed('libprocessgroup_shim.so'),
-    (
-        'vendor/lib64/soundfx/libaecsw_mtk.so',
-        'vendor/lib64/soundfx/libagc1sw_mtk.so',
-        'vendor/lib64/soundfx/libagc2sw_mtk.so',
-        'vendor/lib64/soundfx/libnssw_mtk.so',
-        'vendor/lib64/soundfx/libpreprocessingaidl_mtk.so',
-    ): blob_fixup()
-        .replace_needed('android.media.audio.common.types-V5-ndk.so', 'android.media.audio.common.types-V3-ndk.so'),
     'vendor/lib64/android.hardware.audio.core-impl-mediatek.so': blob_fixup()
         .add_needed('libaudioutils_shim.so')
         .replace_needed('android.media.audio.common.types-V5-ndk.so', 'android.media.audio.common.types-V3-ndk.so')
