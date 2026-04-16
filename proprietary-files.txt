@@ -157,8 +157,6 @@ vendor/etc/audio_device.xml
 vendor/etc/audio_device_fs.xml
 vendor/etc/audiodata.db
 vendor/etc/aurisys_config.xml
-vendor/etc/aurisys_config_hifi3.xml
-vendor/etc/aurisys_config_hifi3_fs.xml
 vendor/etc/aurisys_config_rv.xml
 vendor/lib64/hw/android.hardware.audio.effect.aidl-impl-mediatek.so
 vendor/lib64/hw/android.hardware.soundtrigger3-impl.so
