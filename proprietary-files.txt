@@ -2128,6 +2128,16 @@ vendor/etc/vintf/manifest/manifest_apuware_apusys_aidl.xml
 vendor/etc/vintf/manifest/manifest_apuware_utils_aidl.xml
 vendor/etc/nhw
 vendor/etc/nnapi_powerhal.json
+vendor/data/model/VEdynamic.dla
+vendor/data/model/mt6899_mc_1088x1920.dla
+vendor/data/model/mt6899_mc_736x1280.dla
+vendor/data/model/mt6899_me_1088x1920.dla
+vendor/data/model/mt6899_me_736x1280.dla
+vendor/data/model/mt6899_text_1088x1920.dla
+vendor/data/model/mt6899_text_736x1280.dla
+vendor/data/model/object_detection.dla
+vendor/data/model/x2_SR_dynamic.dla
+vendor/data/model/x3_SR_dynamic.dla
 vendor/lib64/mt6899/libmmagent.so;SYMLINK=vendor/lib64/libmmagent.so
 vendor/lib64/mt6899/libneuralnetworks_sl_driver_mtk_prebuilt.so;SYMLINK=vendor/lib64/libneuralnetworks_sl_driver_mtk_prebuilt.so
 vendor/lib64/mt6899/libneuron_adapter_mgvi.so;SYMLINK=vendor/lib64/libneuron_adapter_mgvi.so
