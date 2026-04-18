@@ -1020,7 +1020,6 @@ vendor/etc/vintf/manifest/manifest_cameraprovider.xml
 vendor/etc/vintf/manifest/manifest_isphal.xml
 vendor/etc/vintf/manifest/manifest_uievent.xml
 vendor/etc/vintf/manifest/vendor.xiaomi.hardware.aidlbgservice-service.xml
-vendor/etc/vintf/manifest/vendor.xiaomi.hardware.dynamiccameraserver.xml
 vendor/etc/vintf/manifest/vendor.xiaomi.hardware.postprocservice-service.xml
 vendor/etc/default_pd_calibration.bin
 vendor/lib64/hw/vendor.mediatek.hardware.camera.atms_aidl@1.0-impl.so
