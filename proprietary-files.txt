@@ -983,7 +983,6 @@ odm/lib64/libmialgo_ellc.so
 odm/lib64/libmialgo_ie_capture.so
 odm/lib64/libmialgo_sd.so
 odm/lib64/libmialgo_utils.so
-odm/lib64/libmiface.so
 odm/lib64/libmiphone_capture_bokeh.so
 odm/lib64/libmiphone_dualcam_depth_aideploy.so
 odm/lib64/libmiremosaic.so
@@ -1515,7 +1514,6 @@ vendor/lib64/vendor.mediatek.hardware.camera.postproc@1.0.so
 vendor/lib64/vendor.mediatek.hardware.camera.uievent-V1-ndk.so
 vendor/lib64/vendor.xiaomi.hardware.aidlbgservice-V1-impl.so
 vendor/lib64/vendor.xiaomi.hardware.aidlbgservice-V1-ndk.so
-vendor/lib64/vendor.xiaomi.hardware.aon-V1-ndk.so
 vendor/lib64/vendor.xiaomi.hardware.bgservice@1.0-impl.so
 vendor/lib64/vendor.xiaomi.hardware.bgservice@1.0.so
 vendor/lib64/vendor.xiaomi.hardware.camera.companion-V1-ndk.so
