@@ -1951,17 +1951,6 @@ vendor/bin/hw/vendor.mediatek.hardware.mms-service
 vendor/etc/init/vendor.mediatek.hardware.mms-service.rc
 vendor/lib64/vendor.mediatek.hardware.mms-V1-ndk.so
 
-# Media - VideoService
-odm/vendor/etc/videoCodecCapability.json
-odm/vendor/etc/videobox.json
-vendor/bin/hw/vendor.xiaomi.hardware.videoservice-service
-vendor/etc/init/vendor.xiaomi.hardware.videoservice-service.rc
-vendor/etc/vintf/manifest/vendor.xiaomi.hardware.videoservice-service.xml
-vendor/lib64/libgui.so:vendor/lib64/libgui-v35.so;FIX_SONAME
-vendor/lib64/libvideoserviceclientimpl_vendor.so
-vendor/lib64/libvideoserviceutils.so
-vendor/lib64/vendor.xiaomi.hardware.videoservice-V5-ndk.so
-
 # Mlipay
 odm/bin/mlipayd_mitee
 odm/etc/init/vendor.xiaomi.hardware.mlipay-miteeservice.rc
