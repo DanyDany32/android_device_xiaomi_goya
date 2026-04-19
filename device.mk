@@ -194,6 +194,7 @@ $(call soong_config_set_bool,lineage_health,charging_control_supports_bypass,fal
 
 # Init
 PRODUCT_PACKAGES += \
+    fstab.enableswap \
     fstab.mt6899 \
     fstab.mt6899.vendor_ramdisk \
     init_conninfra.rc \
