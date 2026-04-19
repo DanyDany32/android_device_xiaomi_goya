@@ -1749,6 +1749,9 @@ vendor/etc/vintf/manifest/vendor.xiaomi.hardware.displayfeature_aidl-service.xml
 vendor/lib64/libdisplayfeature.so
 vendor/lib64/libdisplayfeatureservice.so
 
+# eUICC - from mustang-user 16 BP4A.260205.001 14624666 release-keys
+product/priv-app/EuiccGoogle/EuiccGoogle.apk;PRESIGNED|a76fb4029d7b324b7de7739cd1b1d357b17a9330
+
 # Fingerprint
 odm/lib64/hw/fingerprint.jiiov.so
 odm/lib64/anc.hal.so
