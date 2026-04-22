@@ -142,7 +142,6 @@ drm.service.enabled=true
 
 # Fingerprint
 ro.hardware.fp.fod=true
-ro.hardware.fingerprint=jiiov
 persist.vendor.fingerprint.type=udfps_optical
 persist.vendor.fingerprint.sensor_location=640|2518|105
 
