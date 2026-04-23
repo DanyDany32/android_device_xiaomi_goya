@@ -1907,8 +1907,11 @@ system_ext/priv-app/ImsService/ImsService.apk
 system_ext/priv-app/MtkGbaService/MtkGbaService.apk
 system_ext/priv-app/MtkTelephonyAssist/MtkTelephonyAssist.apk
 vendor/bin/hw/vtservice_aidl
+vendor/bin/volte_clientapi_ua
 vendor/etc/init/init.vtservice_aidl.rc
+vendor/etc/init/volte_clientapi_ua.rc
 vendor/lib64/hw/vendor.mediatek.hardware.videotelephony-impl.so
+vendor/lib64/vendor.mediatek.hardware.clientapi-V1-ndk.so
 vendor/lib64/vendor.mediatek.hardware.videotelephony-V1-ndk.so;MODULE_SUFFIX=_vendor
 
 # Keymint
@@ -2232,11 +2235,13 @@ vendor/bin/hw/mtkfusionrild
 vendor/bin/bip_ap
 vendor/bin/ccci_mdinit
 vendor/bin/ccci_rpcd
+vendor/bin/mcfota_service
 vendor/bin/muxreport
 vendor/etc/init/android.hardware.secure_element@1.2-service-mediatek.rc
 vendor/etc/init/init.bip_ap.rc
 vendor/etc/init/init.cccimdinit.rc
 vendor/etc/init/init.cccirpcd.rc
+vendor/etc/init/mcfota_service.rc
 vendor/etc/init/mtkrild.rc
 vendor/etc/init/muxreport.rc
 vendor/etc/ecc_list.xml
@@ -2256,6 +2261,7 @@ vendor/lib64/libipsec_ims_shr.so
 vendor/lib64/libmipc.so
 vendor/lib64/libmmprofile.so
 vendor/lib64/libmnetlink_v104.so
+vendor/lib64/libmtk-fusion-ril-prop-vsim.so
 vendor/lib64/libmtk-ril.so
 vendor/lib64/libmtkconfig.so
 vendor/lib64/libmtkconfigutils.so
