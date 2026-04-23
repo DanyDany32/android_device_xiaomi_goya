@@ -70,12 +70,12 @@ persist.vendor.camera3.pipeline.bufnum.base.imgo=3
 persist.vendor.camera3.pipeline.bufnum.base.lcso=4
 persist.vendor.camera3.pipeline.bufnum.base.rrzo=3
 persist.vendor.camera3.pipeline.bufnum.base.rsso=4
-persist.vendor.camera3.pipeline.bufnum.min.high_ram.fdyuv=5
+persist.vendor.camera3.pipeline.bufnum.min.high_ram.fdyuv=20
 persist.vendor.camera3.pipeline.bufnum.min.high_ram.imgo=6
 persist.vendor.camera3.pipeline.bufnum.min.high_ram.lcso=7
 persist.vendor.camera3.pipeline.bufnum.min.high_ram.rsso=6
 persist.vendor.camera3.pipeline.bufnum.min.high_ram.rrzo=5
-persist.vendor.camera3.pipeline.bufnum.min.low_ram.fdyuv=5
+persist.vendor.camera3.pipeline.bufnum.min.low_ram.fdyuv=20
 persist.vendor.camera3.pipeline.bufnum.min.low_ram.imgo=5
 persist.vendor.camera3.pipeline.bufnum.min.low_ram.lcso=6
 persist.vendor.camera3.pipeline.bufnum.min.low_ram.rsso=5
@@ -234,8 +234,7 @@ debug.stagefright.c2inputsurface=-1
 media.c2.dmabuf.padding=3072
 media.c2.hal.selection=aidl
 ro.vendor.mtk_sec_video_path_support=1
-ro.vendor.mtk.c2.vdec.fmt.support.level=3
-vendor.mtk.c2.venc.async.systrace=1F
+vendor.mtk.c2.venc.async.systrace=1
 vendor.mtk.vdec.decode.error.handle.mode=3
 vendor.mtk.vdec.waitkeyframeforplay=11
 
@@ -339,17 +338,10 @@ persist.vendor.mtk_wfc_support=1
 persist.vendor.mtk.dch.enable=0
 persist.vendor.mtk.dch.enable.2=0
 persist.vendor.mtk.volte.enable=1
-persist.vendor.radio.fd.counter=150
-persist.vendor.radio.fd.off.counter=50
-persist.vendor.radio.fd.off.r8.counter=50
-persist.vendor.radio.fd.r8.counter=150
 persist.vendor.radio.msimmode=dsds
 persist.vendor.radio.mtk_dsbp_support=3
-persist.vendor.radio.mtk_mipc_support=1
 persist.vendor.radio.mtk_ps2_rat=N/L/W/G
 persist.vendor.radio.mtk_ps3_rat=G
-persist.vendor.radio.nr_display_rule=0
-persist.vendor.radio.oem_urc_enable=1
 persist.vendor.radio.smart.data.switch=1
 persist.vendor.vilte_support=1
 persist.vendor.viwifi_support=1
@@ -379,7 +371,6 @@ ro.vendor.mtk_ril_mode=c6m_1rild
 ro.vendor.mtk_sim_card_onoff=3
 ro.vendor.mtk_sim_hot_swap_common_slot=1
 ro.vendor.mtk_thin_md_telephony_support_mode=0
-ro.vendor.mtk_uicc_clf=1
 ro.vendor.mtk_wappush_support=1
 ro.vendor.mtk_world_phone_policy=0
 ro.vendor.num_md_protocol=2
@@ -398,9 +389,6 @@ ro.vendor.sensors.xiaomi.udfps=true
 
 # Trace
 debug.atrace.tags.enableflags=0x4040e
-
-# Thermal
-ro.vendor.mtk_thermal_2_0=1
 
 # Wifi
 ro.vendor.wifi.sap.concurrent.iface=ap1

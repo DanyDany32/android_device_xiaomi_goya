@@ -5,11 +5,31 @@ persist.vendor.audio.ultrasoundmute.support=true
 ro.vendor.audio.onetrack.audio_track_message.level=1
 ro.vendor.soundtrigger.dfs.support=1
 
+# Camera
+persist.vendor.vcb.enable=false
+ro.vendor.dynamiccamera.ability_level=2
+
+# Display
+ro.vendor.display.RemapBrightness.MaxRemapSilkybrightness=16379
+ro.vendor.display.RemapBrightness.MaxTolerancefac=1.01
+ro.vendor.display.RemapBrightness.MinTolerancefac=1
+ro.vendor.display.RemapBrightness.ToleranceEnable=1
+ro.vendor.display.RemapBrightness.ToleranceNit=600
+ro.vendor.mtk.pq.odm=true
+
 # Radio
 persist.vendor.radio.dynamic_sar=1
 
+# Sensors
+persist.vendor.sensor.maxbrightness=9800
+persist.vendor.sensor.powbrightness=15
+
+# Thermal
+persist.vendor.tracking.dfs=true
+
 # Xiaomi display features
 persist.vendor.dc_backlight.enable=false
+ro.vendor.cabc.enable=false
 ro.vendor.display.all_modes_support_WCG.enable=true
 ro.vendor.display.update_gray_by_temperature=true
 ro.vendor.histogram.enable=1
