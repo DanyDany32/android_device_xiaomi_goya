@@ -329,6 +329,9 @@ $(call inherit-product, hardware/lineage/compat/frameworks/compat.mk)
 $(call inherit-product, hardware/mediatek/frameworks/mediatek-frameworks.mk)
 
 PRODUCT_PACKAGES += \
+    mdota_symlink
+
+PRODUCT_PACKAGES += \
     XiaomiEsimSwitcher \
     XiaomiEuicc
 
