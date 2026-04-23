@@ -184,6 +184,7 @@ DEVICE_FRAMEWORK_COMPATIBILITY_MATRIX_FILE += \
     hardware/xiaomi/vintf/xiaomi_framework_compatibility_matrix.xml
 DEVICE_MANIFEST_FILE += $(DEVICE_PATH)/manifest.xml
 DEVICE_MATRIX_FILE += $(DEVICE_PATH)/compatibility_matrix.xml
+ODM_MANIFEST_FILES += $(DEVICE_PATH)/manifest_odm.xml
 
 # Wifi
 BOARD_WLAN_DEVICE := MediaTek
