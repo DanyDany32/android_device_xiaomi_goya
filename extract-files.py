@@ -190,6 +190,12 @@ blob_fixups: blob_fixups_user_type = {
         .replace_needed('libkeymint.so', 'libkeymint_V3.so'),
     'vendor/etc/init/hw/init.batterysecret.rc': blob_fixup()
         .regex_replace('    seclabel u:r:batterysecret:s0\n', ''),
+    (
+        'vendor/etc/init/android.hardware.graphics.allocator-V2-service-mediatek.rc',
+        'vendor/etc/init/android.hardware.graphics.composer@3.3-service.rc',
+        'vendor/etc/init/arm.mali.platform-mediatek.rc'
+    ): blob_fixup()
+        .regex_replace('.*writepid.*\n', ''),
     'vendor/etc/vintf/manifest/manifest_media_c2_default.xml': blob_fixup()
         .regex_replace('    <fqname>IComponentStore/dolby</fqname>\n', ''),
     'vendor/lib64/hw/android.hardware.audio.effect.aidl-impl-mediatek.so': blob_fixup()
