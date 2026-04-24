@@ -2229,7 +2229,7 @@ vendor/lib64/vendor.mediatek.hardware.neuropilot.agent@1.2.so
 # NFC
 odm/etc/libnfc-nci.conf:vendor/etc/libnfc-nci.conf
 odm/etc/libnfc-nxp.conf:vendor/etc/libnfc-nxp.conf
-odm/etc/libnfc-nxp_RF.conf:vendor/etc/libnfc-nxp_RF.conf
+odm/etc/libnfc-nxp_RF.conf:vendor/libnfc-nxp_RF.conf
 vendor/bin/hw/vendor.xiaomi.hardware.secure_element-service
 vendor/etc/init/secure_element-service.rc
 vendor/lib64/libmigpese@2.0.so
