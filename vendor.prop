@@ -90,11 +90,6 @@ ro.vendor.camera.directfdyuv.support=1
 ro.vendor.camera3.zsl.default=260
 ro.vendor.jpeg_decode_sw_opt=2
 ro.vendor.mtk_cam_security_support=1
-vendor.debug.camera.p1.enable_systrace_log=1
-vendor.debug.camera.ulog.mode=0x11
-vendor.debug.camera.ulog.filter=0xfffff
-vendor.debug.camera.ulog.func=1
-vendor.debug.hal3av3.systrace=1
 
 # Crypto
 ro.crypto.volume.filenames_mode=aes-256-cts
@@ -136,7 +131,6 @@ ro.surface_flinger.supports_background_blur=1
 ro.surface_flinger.uclamp.min=328
 ro.surface_flinger.use_content_detection_for_refresh_rate=true
 ro.vendor.mtk.gpu.service=1
-vendor.dp.systrace.enable=1
 
 # DRM
 drm.service.enabled=true
@@ -235,7 +229,6 @@ debug.stagefright.c2inputsurface=-1
 media.c2.dmabuf.padding=3072
 media.c2.hal.selection=aidl
 ro.vendor.mtk_sec_video_path_support=1
-vendor.mtk.c2.venc.async.systrace=1
 vendor.mtk.vdec.decode.error.handle.mode=3
 vendor.mtk.vdec.waitkeyframeforplay=11
 
@@ -387,9 +380,6 @@ vendor.connsys.driver.ready=no
 # Sensors
 ro.vendor.mtk.sensor.support=yes
 ro.vendor.sensors.xiaomi.udfps=true
-
-# Trace
-debug.atrace.tags.enableflags=0x4040e
 
 # Wifi
 ro.vendor.wifi.sap.concurrent.iface=ap1
