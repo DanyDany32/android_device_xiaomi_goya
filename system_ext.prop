@@ -21,6 +21,11 @@ vendor.rild.libpath=mtk-ril.so
 # Media
 media.stagefright.thumbnail.prefer_hw_codecs=true
 
+# Version
+ro.mi.os.version.code=3
+ro.mi.os.version.incremental=OS3.0.10.0.WOEEUXM
+ro.product.marketname=Xiaomi 15T
+
 # Wifi
 wifi.direct.interface=p2p0
 wifi.interface=wlan0
