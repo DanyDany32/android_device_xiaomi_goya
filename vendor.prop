@@ -381,6 +381,9 @@ vendor.connsys.driver.ready=no
 ro.vendor.mtk.sensor.support=yes
 ro.vendor.sensors.xiaomi.udfps=true
 
+# TEE
+ro.vendor.mtk_mitee_support=1
+
 # Wifi
 ro.vendor.wifi.sap.concurrent.iface=ap1
 ro.vendor.wifi.sap.interface=ap0
