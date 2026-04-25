@@ -1983,13 +1983,6 @@ vendor/bin/hw/vendor.mediatek.hardware.mms-service
 vendor/etc/init/vendor.mediatek.hardware.mms-service.rc
 vendor/lib64/vendor.mediatek.hardware.mms-V1-ndk.so
 
-# Mlipay
-odm/bin/mlipayd_mitee
-odm/etc/init/vendor.xiaomi.hardware.mlipay-miteeservice.rc
-odm/etc/vintf/manifest/manifest_vendor.xiaomi.hardware.mlipay.xml
-odm/lib64/libmlipay_mitee.so
-vendor/lib64/vendor.xiaomi.hardware.mlipay-V1-ndk.so
-
 # Modules
 vendor/etc/init.insmod.mt6899.cfg
 
@@ -1997,8 +1990,10 @@ vendor/etc/init.insmod.mt6899.cfg
 odm/bin/mtd_mitee
 odm/etc/init/vendor.xiaomi.hardware.aidl.mtdservice-miteeservice.rc
 odm/etc/vintf/manifest/manifest_vendor.xiaomi.hardware.aidl.mtdservice.xml
+odm/lib64/libmlipay_mitee.so
 odm/lib64/libmt_mitee.so
 vendor/lib64/vendor.xiaomi.hardware.aidl.mtdservice-V1-ndk.so
+vendor/lib64/vendor.xiaomi.hardware.mlipay-V1-ndk.so
 
 # Native public libraries
 system/etc/public.libraries-mtk.txt
