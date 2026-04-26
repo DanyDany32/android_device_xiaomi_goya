@@ -106,12 +106,6 @@ blob_fixups: blob_fixups_user_type = {
         .replace_needed('android.hardware.sensors-V2-ndk.so', 'android.hardware.sensors-V3-ndk.so')
         .replace_needed('libtinyxml2.so', 'libtinyxml2-v34.so'),
     (
-        'odm/firmware/o12a_nova_csot_thp_config.ini',
-        'odm/firmware/o12a_nova_tm_thp_config.ini'
-    ): blob_fixup()
-        .regex_replace('ic_rate_normal=120', 'ic_rate_normal=240')
-        .regex_replace('rate_normal=120', 'rate_normal=480'),
-    (
         'odm/lib64/camera/plugins/capture/com.xiaomi.plugin.gainmap.so',
         'odm/lib64/camera/plugins/capture/com.xiaomi.plugin.jpegrAggr.so',
     ): blob_fixup()
