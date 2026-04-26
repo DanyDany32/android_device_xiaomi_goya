@@ -45,6 +45,13 @@ prebuilt_etc {
 }
 
 prebuilt_etc {
+    name: "init.esim.rc",
+    src: "init.esim.rc",
+    relative_install_path: "init",
+    vendor: true,
+}
+
+prebuilt_etc {
     name: "init.fingerprint.rc",
     src: "init.fingerprint.rc",
     relative_install_path: "init/hw",
@@ -119,6 +126,12 @@ prebuilt_etc {
     filename: "ueventd.rc",
     src: "ueventd.xiaomi.rc",
     device_specific: true,
+}
+
+sh_binary {
+    name: "init.esim.sh",
+    src: "init.esim.sh",
+    vendor: true,
 }
 
 sh_binary {

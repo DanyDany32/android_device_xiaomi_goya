@@ -1,0 +1,17 @@
+service esim_enable /vendor/bin/mtkmtb -c 5:1
+    disabled
+    oneshot
+    user root
+    group root
+
+service esim_disable /vendor/bin/mtkmtb -c 5:2
+    disabled
+    oneshot
+    user root
+    group root
+
+service esim_state /vendor/bin/init.esim.sh
+    disabled
+    oneshot
+    user root
+    group root
