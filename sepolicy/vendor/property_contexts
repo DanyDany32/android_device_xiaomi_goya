@@ -24,6 +24,9 @@ ro.vendor.xiaomi.bl.poll                          u:object_r:vendor_displayfeatu
 vendor.display.panel.calibration.status           u:object_r:vendor_displayfeature_prop:s0
 vendor.displayfeature.entry.enable                u:object_r:vendor_displayfeature_prop:s0
 
+# eSIM
+vendor.esim.state    u:object_r:vendor_esim_state_prop:s0
+
 # Fingerprint
 persist.vendor.sys.fp.     u:object_r:vendor_fingerprint_prop:s0
 ro.hardware.fp.            u:object_r:vendor_fingerprint_prop:s0

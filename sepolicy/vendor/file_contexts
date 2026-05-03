@@ -25,6 +25,10 @@
 /vendor/bin/hw/vendor\.dolby\.media\.c2-default-service-dax    u:object_r:mediacodec_exec:s0
 /vendor/bin/hw/vendor\.dolby\.media\.c2-service-vision         u:object_r:mediacodec_exec:s0
 
+# eSIM
+/vendor/bin/init\.esim\.sh    u:object_r:vendor_esim_init_shell_exec:s0
+/vendor/bin/mtkmtb            u:object_r:vendor_mtkmtb_exec:s0
+
 # Fingerprint
 /dev/xiaomi-fp                                                               u:object_r:fingerprint_device:s0
 /vendor/bin/hw/android\.hardware\.biometrics\.fingerprint-service\.xiaomi    u:object_r:hal_fingerprint_default_exec:s0

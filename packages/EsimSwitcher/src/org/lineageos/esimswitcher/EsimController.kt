@@ -7,6 +7,7 @@
 package org.lineageos.esimswitcher
 
 import android.content.Context
+import android.os.SystemProperties
 import android.telephony.SubscriptionManager
 import android.util.Log
 import java.io.File
@@ -35,16 +36,14 @@ class EsimController private constructor(private val context: Context) {
     }
 
     fun getEsimEnabled(): Boolean {
-        android.os.SystemProperties.set("ctl.start", "esim_state")
+        SystemProperties.set("ctl.start", "vendor.esim_state")
 
         val start = System.currentTimeMillis()
         while (System.currentTimeMillis() - start < STATE_TIMEOUT_MS) {
-            val state = android.os.SystemProperties.get("vendor.esim.state", "")
+            val state = SystemProperties.get("sys.esim.state", "")
             if (state.isNotEmpty()) {
                 Log.i(TAG, "getEsimEnabled state: $state")
-                android.os.SystemProperties.set("vendor.esim.state", "")
-                val parts = state.split(",").map { it.trim() }
-                return parts.getOrNull(1) == "PRESENT"
+                return state == "enabled"
             }
             Thread.sleep(100)
         }
@@ -54,9 +53,9 @@ class EsimController private constructor(private val context: Context) {
 
     fun setEsimEnabled(isEnabled: Boolean) {
         Log.i(TAG, "setEsimEnabled: $isEnabled")
-        android.os.SystemProperties.set(
+        SystemProperties.set(
             "ctl.start",
-            if (isEnabled) "esim_enable" else "esim_disable"
+            if (isEnabled) "vendor.esim_enable" else "vendor.esim_disable"
         )
     }
 

@@ -4,6 +4,9 @@ vendor_restricted_prop(vendor_batterysecret_prop)
 # DisplayFeature
 vendor_internal_prop(vendor_displayfeature_prop)
 
+# eSIM
+vendor_restricted_prop(vendor_esim_state_prop)
+
 # Fingerprint
 vendor_internal_prop(vendor_fingerprint_prop)
 
