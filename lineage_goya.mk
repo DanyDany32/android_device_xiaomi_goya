@@ -25,8 +25,8 @@ PRODUCT_CHARACTERISTICS := nosdcard
 PRODUCT_GMS_CLIENTID_BASE := android-xiaomi
 
 PRODUCT_BUILD_PROP_OVERRIDES += \
-    BuildDesc="missi-user 16 BP2A.250605.031.A3 OS3.0.10.0.WOEEUXM release-keys" \
-    BuildFingerprint=Xiaomi/goya_eea/goya:16/BP2A.250605.031.A3/OS3.0.10.0.WOEEUXM:user/release-keys \
+    BuildDesc="missi-user 16 BP2A.250605.031.A3 OS3.0.302.0.WOEEUXM release-keys" \
+    BuildFingerprint=Xiaomi/goya_eea/goya:16/BP2A.250605.031.A3/OS3.0.302.0.WOEEUXM:user/release-keys \
     DeviceName=goya \
     DeviceProduct=goya_eea \
     SystemDevice=goya \
