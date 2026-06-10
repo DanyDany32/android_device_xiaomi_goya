@@ -167,6 +167,7 @@ vendor/lib64/hw/vendor.mediatek.hardware.audio-impl.so
 vendor/lib64/android.hardware.audio.core-impl-mediatek.so
 vendor/lib64/libADCSwitch.so
 vendor/lib64/libMtkSpeechEnh.so
+vendor/lib64/libMtkSpeechEnh_swb.so
 vendor/lib64/lib_iir.so
 vendor/lib64/libaudio_aidl_conversion_common_ndk.so:vendor/lib64/libaudio_aidl_conversion_common_ndk_prebuilt.so;DISABLE_DEPS;FIX_SONAME
 vendor/lib64/libaudio_param_parser-vnd.so
@@ -198,12 +199,23 @@ vendor/lib64/libmsbc_mtk.so
 vendor/lib64/libmtklimiter_vendor.so
 vendor/lib64/libmtkshifter_vendor.so
 vendor/lib64/libmtkspparser.so
+vendor/lib64/libmtkspparser_swb.so
 vendor/lib64/libnotifyaudiohal.so;FIX_SONAME
 vendor/lib64/libnxp_extamp_intf.so
 vendor/lib64/librt_extamp_intf.so
 vendor/lib64/libsi_sixth.so
 vendor/lib64/libspeech_enh_lib.so;FIX_SONAME
 vendor/lib64/libspeechparser_vendor.so
+vendor/lib64/libvow_ap_test_aa.so
+vendor/lib64/libvow_ap_test_dd.so
+vendor/lib64/libvow_ap_test_ha.so
+vendor/lib64/libvow_ap_test_hh.so
+vendor/lib64/libvow_ap_test_nn.so
+vendor/lib64/libvow_ap_test_trip_aa.so
+vendor/lib64/libvow_ap_test_trip_dd.so
+vendor/lib64/libvow_ap_test_trip_ha.so
+vendor/lib64/libvow_ap_test_trip_hh.so
+vendor/lib64/libvow_ap_test_trip_nn.so
 vendor/lib64/libvow_ap_test_vaca_aa.so
 vendor/lib64/libvow_ap_test_vaca_dd.so
 vendor/lib64/libvow_ap_test_vaca_ha.so
@@ -938,7 +950,7 @@ odm/lib64/libHISCppAlgos.so
 odm/lib64/libMiEmojiEffect.so
 odm/lib64/libMiVideoFilter.so
 odm/lib64/libTrueSight.so
-odm/lib64/libXMFaceFocus.so
+odm/lib64/libXMFaceFocus.so;SYMLINK=vendor/lib64/libXMFaceFocus.so
 odm/lib64/libabnormal_img_dectect.so
 odm/lib64/libadaptivehdr.so
 odm/lib64/libalCFR.so
@@ -988,7 +1000,7 @@ odm/lib64/libmiphone_dualcam_depth_aideploy.so
 odm/lib64/libmiremosaic.so
 odm/lib64/libmismartae.so
 odm/lib64/libmorpho_Depurple.so
-odm/lib64/libmpbase.so
+odm/lib64/libmpbase.so;SYMLINK=vendor/lib64/libmpbase.so
 odm/lib64/libportrait_repair_apu.so
 odm/lib64/libremosaic_wrapper.so;SYMLINK=vendor/lib64/libremosaic_wrapper.so
 odm/lib64/libremosaiclib.so;SYMLINK=vendor/lib64/libremosaiclib.so
@@ -1628,6 +1640,7 @@ vendor/lib64/vendor.xiaomi.hardware.display.mihwcextension-V1-ndk.so
 # Display - AAL
 vendor/lib64/mt6899/libaal_cust_func.so;SYMLINK=vendor/lib64/libaal_cust_func.so
 vendor/lib64/mt6899/libaalservice.so;SYMLINK=vendor/lib64/libaalservice.so
+vendor/lib64/mt6899/libdre.so;SYMLINK=vendor/lib64/libdre.so
 vendor/lib64/libaal_cust.so
 vendor/lib64/libaal_key.so
 vendor/lib64/libaal_sec.so
@@ -1656,13 +1669,17 @@ vendor/lib64/hw/mt6899/vendor.mediatek.hardware.pq_aidl-impl.so;SYMLINK=vendor/l
 vendor/lib64/mt6899/libaiselector.so;SYMLINK=vendor/lib64/libaiselector.so
 vendor/lib64/mt6899/libhdr10plusvideo.so;SYMLINK=vendor/lib64/libhdr10plusvideo.so
 vendor/lib64/mt6899/libhdrvideo.so;SYMLINK=vendor/lib64/libhdrvideo.so
+vendor/lib64/mt6899/libmml.so;SYMLINK=vendor/lib64/libmml.so
 vendor/lib64/mt6899/libmmlpqImpl.so;SYMLINK=vendor/lib64/libmmlpqImpl.so
+vendor/lib64/mt6899/libpcdbi.so;SYMLINK=vendor/lib64/libpcdbi.so
 vendor/lib64/mt6899/libpq_cust_base.so;SYMLINK=vendor/lib64/libpq_cust_base.so
 vendor/lib64/mt6899/libpq_sec.so;SYMLINK=vendor/lib64/libpq_sec.so
 vendor/lib64/mt6899/libpqconfig.so;SYMLINK=vendor/lib64/libpqconfig.so
 vendor/lib64/mt6899/libpqparamparser.so;SYMLINK=vendor/lib64/libpqparamparser.so
+vendor/lib64/mt6899/libsbd.so;SYMLINK=vendor/lib64/libsbd.so
+vendor/lib64/mt6899/libscltm.so;SYMLINK=vendor/lib64/libscltm.so
+vendor/lib64/libaispq.so
 vendor/lib64/libappgamepq.so
-vendor/lib64/libmml.so
 vendor/lib64/libpqframework.so
 vendor/lib64/libpqhdrmetaparser.so
 vendor/lib64/libpqsharememory.so
@@ -1670,10 +1687,10 @@ vendor/lib64/libpqtuning.so
 vendor/lib64/libpqxmlflagparser.so
 vendor/lib64/libpqxmlparser.so
 vendor/lib64/librgbwlightsensor.so
-vendor/lib64/libscltm.so
 vendor/lib64/libsdrparser.so
 vendor/lib64/libsilkybrightnesscore.so
 vendor/lib64/libudf.so
+vendor/lib64/libvividhdr.so
 vendor/lib64/vendor.mediatek.hardware.mmlpq-V3-ndk.so
 vendor/lib64/vendor.mediatek.hardware.pq@2.0.so
 vendor/lib64/vendor.mediatek.hardware.pq@2.1.so
@@ -2154,6 +2171,7 @@ vendor/lib64/mt6899/libmmagent.so;SYMLINK=vendor/lib64/libmmagent.so
 vendor/lib64/mt6899/libneuralnetworks_sl_driver_mtk_prebuilt.so;SYMLINK=vendor/lib64/libneuralnetworks_sl_driver_mtk_prebuilt.so
 vendor/lib64/mt6899/libneuron_adapter_mgvi.so;SYMLINK=vendor/lib64/libneuron_adapter_mgvi.so
 vendor/lib64/mt6899/libneuron_runtime.8.so;SYMLINK=vendor/lib64/libneuron_runtime.8.so
+vendor/lib64/mt6899/libneuron_runtime.so;SYMLINK=vendor/lib64/libneuron_runtime.so
 vendor/lib64/mt6899/libneuron_wrapper.so;SYMLINK=vendor/lib64/libneuron_wrapper.so
 vendor/lib64/APUWareApusysAidlServer.so
 vendor/lib64/APUWareUtilsAidlServer.so
@@ -2272,6 +2290,7 @@ vendor/etc/virtual-spn-conf-by-efgid1.xml
 vendor/etc/virtual-spn-conf-by-efpnn.xml
 vendor/etc/virtual-spn-conf-by-efspn.xml
 vendor/etc/virtual-spn-conf-by-imsi.xml
+vendor/lib64/libcapctrl.so
 vendor/lib64/libcarrierconfig.so
 vendor/lib64/libccci_util.so
 vendor/lib64/libforkexecwrap.so
