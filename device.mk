@@ -442,6 +442,8 @@ PRODUCT_PACKAGES += \
     vndservicemanager
 
 # Wifi
+PRODUCT_CFI_INCLUDE_PATHS += hardware/mediatek/wlan/wpa_supplicant_8_lib
+
 PRODUCT_PACKAGES += \
     wpa_supplicant \
     hostapd \
