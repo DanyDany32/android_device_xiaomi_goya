@@ -1616,7 +1616,7 @@ vendor/etc/chre/preloaded_nanoapps.json
 odm/lib64/libclient2slpi.notifier.so
 odm/lib64/libframemasterintf.so
 odm/lib64/vendor.xiaomi.hardware.framemaster-V1-ndk.so
-product/etc/displayconfig/display_id_4627039422300187648.xml:vendor/etc/displayconfig/display_id_4627039422300187648.xml
+product/etc/displayconfig/display_id_4627039422300187648.xml:vendor/etc/displayconfig/display_id_4627039422300187648.xml;TRYSRCFIRST
 vendor/bin/hw/android.hardware.graphics.composer@3.3-service
 vendor/etc/init/android.hardware.graphics.composer@3.3-service.rc
 vendor/etc/vintf/manifest/manifest_hwcomposer.xml
