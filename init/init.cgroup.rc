@@ -1,15 +1,10 @@
-on early-init && property:ro.boot.perf_state=1
+on early-init
     # boot perf. tune
-    write /sys/devices/system/cpu/cpufreq/policy0/scaling_min_freq 1000000
-    write /sys/devices/system/cpu/cpufreq/policy4/scaling_min_freq 1000000
-    write /sys/devices/system/cpu/cpufreq/policy7/scaling_min_freq 1000000
+    write /sys/devices/system/cpu/cpufreq/policy0/scaling_min_freq 2000000
+    write /sys/devices/system/cpu/cpufreq/policy4/scaling_min_freq 2500000
+    write /sys/devices/system/cpu/cpufreq/policy7/scaling_min_freq 2700000
 
     write /sys/class/devfreq/mtk-dvfsrc-devfreq/userspace/set_freq 4000000000
-
-on early-init && property:ro.boot.perf_state=1 && property:ro.product.name=goya_global
-    write /sys/devices/system/cpu/cpufreq/policy0/scaling_max_freq 2000000
-    write /sys/devices/system/cpu/cpufreq/policy4/scaling_max_freq 2500000
-    write /sys/devices/system/cpu/cpufreq/policy7/scaling_max_freq 2700000
 
 on charger
     write /sys/devices/system/cpu/cpufreq/policy0/scaling_min_freq 0
@@ -24,7 +19,6 @@ on post-fs-data
     write /proc/sys/kernel/sched_pelt_multiplier 4
     write /proc/sys/kernel/sched_util_clamp_min_rt_default 0
 
-on post-fs-data && property:ro.boot.perf_state=1
     # boot perf. tune
     write /dev/cpuctl/system/cpu.uclamp.min 100
     write /dev/cpuctl/system/cpu.uclamp.latency_sensitive 1
@@ -46,18 +40,6 @@ on boot
     chmod 0660 /sys/devices/system/cpu/cpufreq/policy7/scaling_governor
 
 on property:sys.boot_completed=1
-    write /sys/kernel/debug/sched/migration_cost_ns 200000
-
-    # start cpuqos
-    write /sys/devices/system/cpu/cpuqos/cpuqos_boot_complete 1
-
-    # Set thermal mode to mgame
-    write /sys/devices/virtual/thermal/thermal_message/sconfig 19
-
-    # Enable PowerHAL hint processing
-    setprop vendor.powerhal.init 1
-
-on property:sys.boot_completed=1 && property:ro.boot.perf_state=1
     # restore boot perf. tune
     write /sys/devices/system/cpu/cpufreq/policy0/scaling_min_freq 0
     write /sys/devices/system/cpu/cpufreq/policy4/scaling_min_freq 0
@@ -75,7 +57,13 @@ on property:sys.boot_completed=1 && property:ro.boot.perf_state=1
     write /dev/cpuctl/background/cpu.uclamp.min 0
     write /dev/cpuctl/background/cpu.uclamp.latency_sensitive 0
 
-on property:sys.boot_completed=1 && property:ro.boot.perf_state=1 && property:ro.product.name=goya_global
-    write /sys/devices/system/cpu/cpufreq/policy0/scaling_max_freq 2147483647
-    write /sys/devices/system/cpu/cpufreq/policy4/scaling_max_freq 2147483647
-    write /sys/devices/system/cpu/cpufreq/policy7/scaling_max_freq 2147483647
+    write /sys/kernel/debug/sched/migration_cost_ns 200000
+
+    # start cpuqos
+    write /sys/devices/system/cpu/cpuqos/cpuqos_boot_complete 1
+
+    # Set thermal mode to mgame
+    write /sys/devices/virtual/thermal/thermal_message/sconfig 19
+
+    # Enable PowerHAL hint processing
+    setprop vendor.powerhal.init 1
