@@ -348,6 +348,15 @@
         ""
       ],
       "Type": "Property"
+    },
+    {
+      "Name": "PowerHALRenderingState",
+      "Path": "vendor.powerhal.rendering",
+      "Values": [
+        "EXPENSIVE_RENDERING",
+        ""
+      ],
+      "Type": "Property"
     }
   ],
   "Actions": [
@@ -416,6 +425,18 @@
       "Node": "CPUSuperClusterMinFreq",
       "Duration": 0,
       "Value": "1000000"
+    },
+    {
+      "PowerHint": "EXPENSIVE_RENDERING",
+      "Node": "PowerHALRenderingState",
+      "Duration": 0,
+      "Value": "EXPENSIVE_RENDERING"
+    },
+    {
+      "PowerHint": "EXPENSIVE_RENDERING",
+      "Node": "GpuPwrLevel",
+      "Duration": 0,
+      "Value": "20"
     },
     {
       "PowerHint": "GAME_LOADING",
