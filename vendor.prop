@@ -51,6 +51,7 @@ vendor.streamin.pcm.dump=0
 
 # AVF
 avf.remote_attestation.enabled=0
+hypervisor.memory_reclaim.supported=true
 
 # Bluetooth
 ro.bluetooth.a2dp_offload.supported=true
