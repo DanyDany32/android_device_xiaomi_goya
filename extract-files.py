@@ -185,6 +185,17 @@ blob_fixups: blob_fixups_user_type = {
         'vendor/lib64/vendor.mediatek.hardware.pq_aidl-V7-ndk.so'
     ): blob_fixup()
         .replace_needed('android.hardware.graphics.common-V5-ndk.so', 'android.hardware.graphics.common-V7-ndk.so'),
+    (
+        'vendor/bin/hw/android.hardware.media.c2-mediatek-64b',
+        'vendor/bin/hw/vendor.dolby.media.c2-default-service-dax',
+        'vendor/bin/hw/vendor.dolby.media.c2-service-vision',
+        'vendor/lib64/c2.dolby.client.so',
+        'vendor/lib64/c2.dolby.hevc.dec.so',
+        'vendor/lib64/c2.dolby.hevc.sec.dec.so',
+        'vendor/lib64/libcodec2_mtk_vdec.so',
+        'vendor/lib64/libcodec2_mtk_venc.so'
+    ): blob_fixup()
+        .replace_needed('libcodec2_aidl.so', 'libcodec2_aidl_prebuilt.so'),
     'vendor/bin/hw/android.hardware.security.keymint@3.0-service.mitee': blob_fixup()
         .replace_needed('lib_android_keymaster_keymint_utils.so', 'lib_android_keymaster_keymint_utils_V3.so')
         .replace_needed('libkeymint.so', 'libkeymint_V3.so'),
@@ -196,8 +207,6 @@ blob_fixups: blob_fixups_user_type = {
         'vendor/etc/init/arm.mali.platform-mediatek.rc'
     ): blob_fixup()
         .regex_replace('.*writepid.*\n', ''),
-    'vendor/etc/vintf/manifest/manifest_media_c2_default.xml': blob_fixup()
-        .regex_replace('    <fqname>IComponentStore/dolby</fqname>\n', ''),
     'vendor/lib64/hw/android.hardware.audio.effect.aidl-impl-mediatek.so': blob_fixup()
         .replace_needed('android.media.audio.common.types-V5-ndk.so', 'android.media.audio.common.types-V3-ndk.so')
         .replace_needed('libtinyxml2.so', 'libtinyxml2-v34.so'),
