@@ -1,5 +1,5 @@
 # All proprietary files from this list, unless pinned and noted otherwise,
-# are from Xiaomi 15T (OS3.0.302.0.WOEEUXM).
+# are from Xiaomi 15T (OS3.0.304.0.WOEEUXM).
 
 # AEE
 vendor/lib64/libaedv.so
