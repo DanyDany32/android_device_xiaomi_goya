@@ -1,5 +1,4 @@
 bootprof.ko
-bootmonitor.ko
 mrdump.ko
 aee_aed.ko
 monitor_hang.ko
@@ -71,10 +70,6 @@ mtk-smi-dbg.ko
 mtk-icc-core.ko
 mtk-mmdvfs-ftrace.ko
 hwid.ko
-simtray.ko
-zsmalloc.ko
-zram.ko
-perf_helper.ko
 mtk-mmdvfs-v3.ko
 mtk-mmdvfs.ko
 mtk-mmdvfs-debug.ko
@@ -220,8 +215,6 @@ mtk_mdpm.ko
 mtk_rpmsg_mbox.ko
 mtk-mbox.ko
 mtk_tinysys_ipi.ko
-unfairmem.ko
-scene_swappiness.ko
 sec.ko
 uload_ind.ko
 load_track.ko
@@ -234,9 +227,3 @@ block2mtd.ko
 chipreg.ko
 mtdblock.ko
 mtd.ko
-sla.ko
-miwill.ko
-miwill_mode_redudancy.ko
-minet.ko
-crash_module.ko
-mi_t1_gpio.ko

@@ -1097,14 +1097,6 @@ on boot
     chown system system /sys/power/dcm_state
     chmod 0660 /sys/power/dcm_state
 
-
-    # MIUI ADD: Performance_UnfairMem
-    chmod 0771 /proc/mi_mem_engine
-    chown system root /proc/mi_mem_engine/scene_tid
-    chown system root /proc/mi_mem_engine/sf_pid
-    chmod 0664 /proc/mi_mem_engine/scene_tid
-    # END Performance_UnfairMem
-
 ##Netlog tool
    #change permissions about terminal
     chown root radio /proc/net/vlan/config

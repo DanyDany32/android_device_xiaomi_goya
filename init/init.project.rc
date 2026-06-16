@@ -46,10 +46,6 @@ on post-fs-data
     chmod 0660 /dev/spm
     chown system system /dev/spm
 
-# MIUI ADD: Performance_BoostFramework
-    chown system system /sys/module/perf_helper/mimd/mimdtrigger
-# END Performance_BoostFramework
-
 #Wifi
     mkdir /data/vendor/wlan_logs 0777 root shell
 
@@ -64,45 +60,6 @@ on post-fs-data
 
 #migt & metis
 on post-fs-data
-    chmod 0666 /dev/migt
-    restorecon /dev/migt
-    chmod 0777 /sys/module/migt/parameters/migt_freq
-    restorecon /sys/module/migt/parameters/migt_freq
-    chmod 0777 /sys/module/migt/parameters/migt_ms
-    restorecon /sys/module/migt/parameters/migt_ms
-    chmod 0777 /sys/module/migt/parameters/migt_thresh
-    restorecon /sys/module/migt/parameters/migt_thresh
-    chmod 0777 /sys/module/migt/parameters/boost_policy
-    restorecon /sys/module/migt/parameters/boost_policy
-    chmod 0777 /sys/module/migt/parameters/fps_variance_ratio
-    restorecon /sys/module/migt/parameters/fps_variance_ratio
-    chmod 0777 /sys/module/migt/parameters/super_task_max_num
-    restorecon /sys/module/migt/parameters/super_task_max_num
-    chmod 0777 /sys/module/migt/parameters/migt_ceiling_freq
-    restorecon /sys/module/migt/parameters/migt_ceiling_freq
-    chmod 0777 /sys/module/migt/parameters/stask_candidate_num
-    restorecon /sys/module/migt/parameters/stask_candidate_num
-    chmod 0666 /sys/module/migt/parameters/glk_disable
-    restorecon /sys/module/migt/parameters/glk_disable
-    chmod 0666 /sys/module/migt/parameters/glk_fbreak_enable
-    restorecon /sys/module/migt/parameters/glk_fbreak_enable
-    chmod 0666 /sys/module/migt/parameters/glk_freq_limit_walt
-    restorecon /sys/module/migt/parameters/glk_freq_limit_walt
-    chmod 0666 /sys/module/migt/parameters/glk_minfreq
-    restorecon /sys/module/migt/parameters/glk_minfreq
-    chmod 0666 /sys/module/migt/parameters/glk_maxfreq
-    restorecon /sys/module/migt/parameters/glk_maxfreq
-    chmod 0666 /sys/module/migt/parameters/force_stask_to_big
-    restorecon /sys/module/migt/parameters/force_stask_to_big
-    chmod 0666 /sys/module/migt/parameters/force_reset_runtime
-    restorecon /sys/module/migt/parameters/force_reset_runtime
-    chmod 0777 /sys/module/metis/parameters/minor_window_app
-    restorecon /sys/module/metis/parameters/minor_window_app
-    chmod 0666 /sys/module/migt/parameters/mi_viptask
-    restorecon /sys/module/migt/parameters/mi_viptask
-    chmod 0666 /sys/module/migt/parameters/mi_freq_enable
-    restorecon /sys/module/migt/parameters/mi_freq_enable
-
     chmod 0666 /dev/metis
     restorecon /dev/metis
     chown 0666 /sys/module/metis/parameters
@@ -182,19 +139,6 @@ on post-fs-data
     chown system system /sys/class/thermal/thermal_message/temp_aware
 #END Thermal
 
-# MIUI ADD: Power_UnionPowerCore
-    chown root system /sys/unionpower/frame_jank
-    chown root system /sys/module/unionpower/parameters/FRAME_MONITOR_ENABLE
-    chown root system /sys/module/unionpower/parameters/JANK_LIMIT
-    chown root system /sys/module/unionpower/parameters/NICE_MORE_LIMIT
-    chown root system /sys/module/unionpower/parameters/VSYNC_GAP
-    chmod 0664 /sys/unionpower/frame_jank
-    chmod 0664 /sys/module/unionpower/parameters/FRAME_MONITOR_ENABLE
-    chmod 0664 /sys/module/unionpower/parameters/JANK_LIMIT
-    chmod 0664 /sys/module/unionpower/parameters/NICE_MORE_LIMIT
-    chmod 0664 /sys/module/unionpower/parameters/VSYNC_GAP
-# END Power_UnionPowerCore
-
 #MIUI ADD: Audio_MIUIAudioFrame
 # smart pa calibration
     chmod 0660 /dev/fs16xx
@@ -262,12 +206,6 @@ on property:sys.boot_completed=1
     chown system system /sys/class/flashlight_core/flashlight/torchbrightness
     chmod 0664 /sys/class/flashlight_core/flashlight/torchbrightness
 #END Adapt_MIodm
-
-# MIUI ADD: Performance_LogEnhance
-	chmod 0666 /dev/mi_exception_log
-	chown system system /proc/mi_log/binder_delay
-	chown system system /proc/mi_log/delay
-# END Performance_LogEnhance
 
 service vendor_tcpdump /vendor/bin/tcpdump-vendor -i any -W 3 -C 5 -s 134 -w /data/vendor/wlan_logs/tcpdump.pcap -Z system
        class main

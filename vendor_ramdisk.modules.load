@@ -1,5 +1,4 @@
 bootprof.ko
-bootmonitor.ko
 mrdump.ko
 aee_aed.ko
 monitor_hang.ko
@@ -218,4 +217,3 @@ block2mtd.ko
 chipreg.ko
 mtdblock.ko
 mtd.ko
-crash_module.ko
