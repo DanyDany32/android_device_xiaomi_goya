@@ -86,13 +86,6 @@ mdp_drv_dummy.ko
 rt4831a_drv.ko
 mtk_panel_ext.ko
 panel-o12a-36-02-0a-dsc-vdo.ko
-panel-truly-td4330-cmd.ko
-panel-truly-nt35595-cmd.ko
-panel-alpha-jdi-nt36672e-vdo-60hz.ko
-panel-alpha-jdi-nt36672e-vdo-120hz-threshold.ko
-panel-alpha-jdi-nt36672e-vdo-120hz.ko
-panel-nt37801-cmd-120hz.ko
-panel-alpha-jdi-nt36672e-cphy-vdo.ko
 mtk-afe-external.ko
 drm_dma_helper.ko
 drm_display_helper.ko
