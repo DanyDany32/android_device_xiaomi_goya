@@ -35,6 +35,17 @@
             android:name=".display.ColorService"
             android:permission="ColorService">
         </service>
+
+        <activity
+            android:name=".fingerprint.FingerprintSettingsActivity"
+            android:exported="true"
+            android:label="@string/fingerprint_settings_title">
+            <intent-filter>
+                <action android:name="com.android.settings.action.IA_SETTINGS" />
+            </intent-filter>
+            <meta-data android:name="com.android.settings.category"
+                       android:value="com.android.settings.category.ia.display" />
+        </activity>
     </application>
 </manifest>
 

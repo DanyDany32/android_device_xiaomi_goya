@@ -1,11 +1,14 @@
 allow hal_fingerprint_default touchfeature_device:chr_file rw_file_perms;
 
 allow hal_fingerprint_default persist_data_file:dir search;
+allow hal_fingerprint_default persist_data_file:file rw_file_perms;
 allow hal_fingerprint_default mnt_vendor_file:dir search;
+rw_dir_file(hal_fingerprint_default, vendor_fingerprint_data_file_fpdump)
 
 allow hal_fingerprint_default vendor_displayfeature_device:dir r_dir_perms;
 allow hal_fingerprint_default vendor_displayfeature_device:chr_file rw_file_perms;
-r_dir_file(hal_fingerprint_default, vendor_sysfs_displayfeature)
+allow hal_fingerprint_default vendor_sysfs_displayfeature:dir r_dir_perms;
+allow hal_fingerprint_default vendor_sysfs_displayfeature:file rw_file_perms;
 r_dir_file(hal_fingerprint_default, vendor_sysfs_touch)
 
 set_prop(hal_fingerprint_default, vendor_fingerprint_prop)

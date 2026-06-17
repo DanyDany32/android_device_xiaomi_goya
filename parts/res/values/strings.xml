@@ -6,4 +6,9 @@
 <resources>
     <!-- App Name -->
     <string name="app_name">Xiaomi Parts</string>
+
+    <!-- Fingerprint settings -->
+    <string name="fingerprint_settings_title">Additional in-screen fingerprint settings</string>
+    <string name="fingerprint_calibration_title">In-screen Fingerprint calibration</string>
+    <string name="fingerprint_calibration_summary">Launch Jiiov FactoryTest app for calibrating the optical fingerprint sensor</string>
 </resources>

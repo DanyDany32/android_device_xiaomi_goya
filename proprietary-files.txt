@@ -1806,6 +1806,7 @@ vendor/lib64/vendor.dolby.hardware.dms@2.0.so
 mi_ext/product/priv-app/EuiccGoogle/EuiccGoogle.apk:product/priv-app/EuiccGoogle/EuiccGoogle.apk;PRESIGNED
 
 # Fingerprint
+odm/app/JVFactoryTest_goya/JVFactoryTest_goya.apk:system_ext/app/JVFactoryTest_goya/JVFactoryTest_goya.apk
 odm/lib64/hw/fingerprint.jiiov.so:odm/lib64/hw/fingerprint.jiiov.default.so;FIX_SONAME
 odm/lib64/anc.hal.so
 vendor/lib64/vendor.xiaomi.hardware.fx.tunnel-V1-ndk.so

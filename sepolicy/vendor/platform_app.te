@@ -1,0 +1,8 @@
+hal_client_domain(platform_app, hal_fingerprint)
+
+binder_call(platform_app, hal_fingerprint_default)
+
+allow platform_app vendor_fingerprint_data_file_fpdump:file r_file_perms;
+r_dir_file(platform_app, vendor_sysfs_displayfeature)
+
+get_prop(platform_app, vendor_fingerprint_prop)

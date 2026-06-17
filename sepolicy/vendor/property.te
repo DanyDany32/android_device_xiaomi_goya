@@ -8,7 +8,7 @@ vendor_internal_prop(vendor_displayfeature_prop)
 vendor_restricted_prop(vendor_esim_state_prop)
 
 # Fingerprint
-vendor_internal_prop(vendor_fingerprint_prop)
+vendor_public_prop(vendor_fingerprint_prop)
 
 # ID manager
 vendor_restricted_prop(vendor_idmanager_prop)
