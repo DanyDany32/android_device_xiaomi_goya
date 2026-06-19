@@ -1,4 +1,4 @@
-#
+    #
 # SPDX-FileCopyrightText: The LineageOS Project
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -137,13 +137,13 @@ BOARD_EROFS_PCLUSTER_SIZE := 262144
 PRODUCT_FS_COMPRESSION := 1
 
 # MODIFICA 2: I copy_out sono stati uniti sopra o gestiti da Lineage, ho "spento" i doppioni per non causare errori di Make
-# TARGET_COPY_OUT_ODM := odm
-# TARGET_COPY_OUT_ODM_DLKM := odm_dlkm
-# TARGET_COPY_OUT_PRODUCT := product
-# TARGET_COPY_OUT_SYSTEM_DLKM := system_dlkm
-# TARGET_COPY_OUT_SYSTEM_EXT := system_ext
-# TARGET_COPY_OUT_VENDOR := vendor
-# TARGET_COPY_OUT_VENDOR_DLKM := vendor_dlkm
+TARGET_COPY_OUT_ODM := odm
+TARGET_COPY_OUT_ODM_DLKM := odm_dlkm
+TARGET_COPY_OUT_PRODUCT := product
+TARGET_COPY_OUT_SYSTEM_DLKM := system_dlkm
+TARGET_COPY_OUT_SYSTEM_EXT := system_ext
+TARGET_COPY_OUT_VENDOR := vendor
+TARGET_COPY_OUT_VENDOR_DLKM := vendor_dlkm
 
 # Recovery
 BOARD_MOVE_RECOVERY_RESOURCES_TO_VENDOR_BOOT := true
