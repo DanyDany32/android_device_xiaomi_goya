@@ -7,13 +7,13 @@
 $(call inherit-product, device/xiaomi/goya/device.mk)
 
 # Inherit from the LineageOS configuration.
-$(call inherit-product, vendor/lineage/config/common_full_phone.mk)
+$(call inherit-product, vendor/twrp/config/common.mk)
 
 PRODUCT_BRAND := Xiaomi
 PRODUCT_DEVICE := goya
 PRODUCT_MANUFACTURER := Xiaomi
 PRODUCT_MODEL := 25069PTEBG
-PRODUCT_NAME := lineage_goya
+PRODUCT_NAME := twrp_goya
 
 PRODUCT_BRAND_FOR_ATTESTATION := $(PRODUCT_BRAND)
 PRODUCT_DEVICE_FOR_ATTESTATION := $(PRODUCT_DEVICE)
