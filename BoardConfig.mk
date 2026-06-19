@@ -230,3 +230,13 @@ TW_INCLUDE_CRYPTO_FBE := true
 TW_INCLUDE_FBE_METADATA_DECRYPT := true
 TW_USE_FSCRYPT_POLICY := 2
 
+# Scarica il Kernel e i Moduli fisici
+echo "Scaricando il Kernel e i Moduli proprietari..."
+mkdir -p device/xiaomi/goya-kernel
+wget -O kernel.zip "QUI_CI_DEVE_ESSERE_IL_TUO_LINK_DI_GITHUB"
+unzip -o kernel.zip -d device/xiaomi/goya-kernel/
+rm kernel.zip
+
+# IL FIX DEL DTB: Spostiamo il file in una cartella e aggiungiamo l'estensione .dtb!
+mkdir -p device/xiaomi/goya-kernel/dtb_dir
+mv device/xiaomi/goya-kernel/dtb device/xiaomi/goya-kernel/dtb_dir/goya.dtb
