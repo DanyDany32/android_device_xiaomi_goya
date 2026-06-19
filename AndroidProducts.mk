@@ -4,4 +4,8 @@
 #
 
 PRODUCT_MAKEFILES := \
-    $(LOCAL_DIR)/lineage_goya.mk
+    $(LOCAL_DIR)/twrp_goya.mk
+
+COMMON_LUNCH_CHOICES := \
+    twrp_goya-eng \
+    twrp_goya-userdebug
