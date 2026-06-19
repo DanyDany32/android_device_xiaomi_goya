@@ -123,15 +123,15 @@ BOARD_XIAOMI_DYNAMIC_PARTITIONS_SIZE := $(shell expr $(BOARD_SUPER_PARTITION_SIZ
 BOARD_PRODUCTIMAGE_FILE_SYSTEM_TYPE := ext4
 BOARD_SYSTEMIMAGE_FILE_SYSTEM_TYPE := ext4
 BOARD_SYSTEM_EXTIMAGE_FILE_SYSTEM_TYPE := ext4
-BOARD_VENDORIMAGE_FILE_SYSTEM_TYPE := ext4
-BOARD_ODMIMAGE_FILE_SYSTEM_TYPE := ext4
-BOARD_SYSTEM_DLKMIMAGE_FILE_SYSTEM_TYPE := ext4
-BOARD_VENDOR_DLKMIMAGE_FILE_SYSTEM_TYPE := ext4
-BOARD_ODM_DLKMIMAGE_FILE_SYSTEM_TYPE := ext4
+# BOARD_VENDORIMAGE_FILE_SYSTEM_TYPE := ext4
+# BOARD_ODMIMAGE_FILE_SYSTEM_TYPE := ext4
+# BOARD_SYSTEM_DLKMIMAGE_FILE_SYSTEM_TYPE := ext4
+# BOARD_VENDOR_DLKMIMAGE_FILE_SYSTEM_TYPE := ext4
+# BOARD_ODM_DLKMIMAGE_FILE_SYSTEM_TYPE := ext4
 
-BOARD_EROFS_COMPRESS_HINTS := $(DEVICE_PATH)/configs/partitions/erofs_compress_hints.txt
-BOARD_EROFS_PCLUSTER_SIZE := 262144
-PRODUCT_FS_COMPRESSION := 1
+# BOARD_EROFS_COMPRESS_HINTS := $(DEVICE_PATH)/configs/partitions/erofs_compress_hints.txt
+# BOARD_EROFS_PCLUSTER_SIZE := 262144
+# PRODUCT_FS_COMPRESSION := 1
 
 # MODIFICA 2: I copy_out sono stati uniti sopra o gestiti da Lineage, ho "spento" i doppioni per non causare errori di Make
 TARGET_COPY_OUT_ODM := odm
@@ -150,9 +150,9 @@ TARGET_RECOVERY_PIXEL_FORMAT := BGRA_8888
 TARGET_USERIMAGES_USE_F2FS := true
 
 # SEPolicy
-BOARD_VENDOR_SEPOLICY_DIRS += $(DEVICE_PATH)/sepolicy/vendor
-SYSTEM_EXT_PRIVATE_SEPOLICY_DIRS += $(DEVICE_PATH)/sepolicy/private
-SYSTEM_EXT_PUBLIC_SEPOLICY_DIRS += $(DEVICE_PATH)/sepolicy/public
+# BOARD_VENDOR_SEPOLICY_DIRS += $(DEVICE_PATH)/sepolicy/vendor
+# SYSTEM_EXT_PRIVATE_SEPOLICY_DIRS += $(DEVICE_PATH)/sepolicy/private
+# SYSTEM_EXT_PUBLIC_SEPOLICY_DIRS += $(DEVICE_PATH)/sepolicy/public
 
 # Verified Boot
 BOARD_AVB_ENABLE := true
@@ -177,13 +177,13 @@ BOARD_AVB_VBMETA_VENDOR_ROLLBACK_INDEX := 0
 BOARD_AVB_VBMETA_VENDOR_ROLLBACK_INDEX_LOCATION := 4
 
 # VINTF
-DEVICE_FRAMEWORK_COMPATIBILITY_MATRIX_FILE += \
-    hardware/mediatek/vintf/mediatek_framework_compatibility_matrix_aidl.xml \
-    hardware/xiaomi/vintf/xiaomi_framework_compatibility_matrix.xml \
-    $(DEVICE_PATH)/device_framework_matrix.xml
-DEVICE_MANIFEST_FILE += $(DEVICE_PATH)/manifest.xml
-DEVICE_MATRIX_FILE += $(DEVICE_PATH)/compatibility_matrix.xml
-ODM_MANIFEST_FILES += $(DEVICE_PATH)/manifest_odm.xml
+# DEVICE_FRAMEWORK_COMPATIBILITY_MATRIX_FILE += \
+#     hardware/mediatek/vintf/mediatek_framework_compatibility_matrix_aidl.xml \
+#     hardware/xiaomi/vintf/xiaomi_framework_compatibility_matrix.xml \
+#     $(DEVICE_PATH)/device_framework_matrix.xml
+# DEVICE_MANIFEST_FILE += $(DEVICE_PATH)/manifest.xml
+# DEVICE_MATRIX_FILE += $(DEVICE_PATH)/compatibility_matrix.xml
+# ODM_MANIFEST_FILES += $(DEVICE_PATH)/manifest_odm.xml
 
 # Wifi
 BOARD_WLAN_DEVICE := MediaTek
