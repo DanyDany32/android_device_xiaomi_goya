@@ -21,9 +21,6 @@ TARGET_NO_BOOTLOADER := true
 TARGET_SCREEN_DENSITY := 520
 TARGET_USES_VULKAN := true
 
-# Filesystem
-TARGET_FS_CONFIG_GEN += hardware/nxp/keymint/KM300/res/config.fs
-
 # Kernel
 BOARD_BOOT_HEADER_VERSION := 4
 BOARD_KERNEL_BASE := 0x3fff8000
