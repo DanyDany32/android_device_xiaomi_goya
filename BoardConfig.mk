@@ -233,3 +233,15 @@ TW_NO_HAPTICS := true
 TARGET_USES_MKE2FS := true
 
 TW_SCREEN_BLANK_ON_BOOT := true
+
+# ===============================================
+# ANTI-FREEZE & GUI DEADLOCK FIX
+# ===============================================
+# Forza il refresh dello schermo e impedisce il blocco sul logo
+TARGET_RECOVERY_UI_BLANK_UNBLANK_ON_INIT := true
+TW_NO_SCREEN_BLANK := true
+TW_NO_SCREEN_TIMEOUT := true
+
+# Disabilita funzioni che causano loop infiniti su kernel A15
+TW_EXCLUDE_APEX := true
+TW_IGNORE_LOGICAL_MOUNT_ERRORS := true
