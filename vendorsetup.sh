@@ -7,3 +7,7 @@ rm kernel.zip
 # IL FIX DEL DTB: Spostiamo il file in una cartella e aggiungiamo l'estensione .dtb!
 mkdir -p device/xiaomi/goya-kernel/dtb_dir
 mv device/xiaomi/goya-kernel/dtb device/xiaomi/goya-kernel/dtb_dir/goya.dtb
+
+export OF_SKIP_FBE_DECRYPTION=1
+export OF_DONT_PATCH_ENCRYPTED_DEVICE=1
+export OF_SKIP_DECRYPTED_DATA=1
