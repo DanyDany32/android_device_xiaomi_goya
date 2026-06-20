@@ -224,8 +224,14 @@ TW_INCLUDE_FASTBOOTD := true
 TW_INCLUDE_REPACKTOOLS := true
 AB_OTA_UPDATER := true
 
-# Decrittazione FBEv2 (Fondamentale per leggere i dati)
-TW_INCLUDE_CRYPTO := true
-TW_INCLUDE_CRYPTO_FBE := true
-TW_INCLUDE_FBE_METADATA_DECRYPT := true
-TW_USE_FSCRYPT_POLICY := 2
+# ===============================================
+# CRITTOGRAFIA (SPENTA PER SBLOCCARE IL LOGO)
+# ===============================================
+# TW_INCLUDE_CRYPTO := true
+# TW_INCLUDE_CRYPTO_FBE := true
+# TW_INCLUDE_FBE_METADATA_DECRYPT := true
+# TW_USE_FSCRYPT_POLICY := 2
+
+TW_EXCLUDE_ENCRYPTED_BACKUPS := true
+OF_DONT_PATCH_ENCRYPTED_DEVICE := 1
+OF_SKIP_DECRYPTED_DATA := 1
