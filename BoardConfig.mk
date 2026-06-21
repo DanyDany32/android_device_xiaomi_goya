@@ -37,6 +37,8 @@ BOARD_BOOTCONFIG += androidboot.hypervisor.protected_vm.supported=1
 BOARD_KERNEL_CMDLINE += bootopt=64S3,32N2,64N2
 BOARD_KERNEL_CMDLINE += kasan=off
 BOARD_KERNEL_CMDLINE += rcupdate.rcu_expedited=1 rcutree.enable_rcu_lazy
+# MODIFICA AGGIUNTA ORA: Disabilita i blocchi di sicurezza in lettura/scrittura
+BOARD_KERNEL_CMDLINE += androidboot.selinux=permissive
 
 BOARD_INIT_BOOT_HEADER_VERSION := 4
 
@@ -250,3 +252,6 @@ TW_OBOX_DISPLAY := true
 # Disabilita funzioni che causano loop infiniti su kernel A15
 TW_EXCLUDE_APEX := true
 TW_IGNORE_LOGICAL_MOUNT_ERRORS := true
+# MODIFICA AGGIUNTA ORA: Disabilita il riavvio automatico della recovery in caso di errori
+TW_NO_REBOOT_BOOTLOADER := false
+TW_NO_REBOOT_RECOVERY := false
