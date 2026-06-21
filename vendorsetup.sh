@@ -8,6 +8,9 @@ rm kernel.zip
 mkdir -p device/xiaomi/goya-kernel/dtb_dir
 mv device/xiaomi/goya-kernel/dtb device/xiaomi/goya-kernel/dtb_dir/goya.dtb
 
+# Copia i driver del touch estratti dal telefono nella cartella dei moduli
+cp device/xiaomi/goya/prebuilt_modules/*.ko device/xiaomi/goya-kernel/modules/
+
 export OF_SKIP_FBE_DECRYPTION=1
 export OF_DONT_PATCH_ENCRYPTED_DEVICE=1
 export OF_SKIP_DECRYPTED_DATA=1
