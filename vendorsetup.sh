@@ -13,6 +13,9 @@ export OF_DONT_PATCH_ENCRYPTED_DEVICE=1
 export OF_SKIP_DECRYPTED_DATA=1
 export OF_IGNORE_LOGICAL_MOUNT_ERRORS=1
 export OF_NO_SPLASH_STAY=1
+# MODIFICA AGGIUNTA ORA: Evita i bootloop dovuti alla fstab "falsa"
+export OF_NO_RELOAD_AFTER_DECRYPTION=1
+export OF_MAINTAIN_MISSING_FSTAB_PARTITIONS=1
 
 # === FIX GRAFICO E SCHERMO ===
 # Disabilita l'animazione di avvio che fa crashare il DRM su MediaTek
