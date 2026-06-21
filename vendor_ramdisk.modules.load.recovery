@@ -220,7 +220,7 @@ block2mtd.ko
 chipreg.ko
 mtdblock.ko
 mtd.ko
-touch_boost.ko
 mtk_ioctl_touch_boost.ko
+touch_boost.ko
 xiaomi_touch_goya.ko
 nt38771_touch_goya.ko
