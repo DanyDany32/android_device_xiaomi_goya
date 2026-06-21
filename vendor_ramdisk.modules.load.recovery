@@ -220,3 +220,5 @@ block2mtd.ko
 chipreg.ko
 mtdblock.ko
 mtd.ko
+xiaomi_touch_goya.ko
+nt38771_touch_goya.ko
