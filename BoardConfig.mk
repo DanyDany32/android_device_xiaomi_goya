@@ -261,12 +261,18 @@ BOARD_HAS_NO_REAL_SDCARD := true
 RECOVERY_SDCARD_ON_DATA := true
 
 # ===============================================
-# FIX USB E ADB (Iniettato nel Kernel)
+# FIX USB E ADB (Aggressivo)
 # ===============================================
 TARGET_RECOVERY_DEFAULT_USB_CONFIG := mtp,adb
 TW_HAS_MTP := true
-# Inietta l'USB prima che la recovery parta
+TW_INCLUDE_RESETPROP := true
 BOARD_KERNEL_CMDLINE += androidboot.usbcontroller=11201000.usb0
+BOARD_VENDOR_DEFAULT_PROPERTY_OVERRIDES += \
+    sys.usb.controller=11201000.usb0 \
+    sys.usb.configfs=1 \
+    sys.usb.ffs.ready=1 \
+    sys.usb.config=adb \
+    ro.adb.secure=0
 
 # ===============================================
 # FIX TOUCHSCREEN E KERNEL MODULES
