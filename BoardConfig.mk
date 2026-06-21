@@ -227,9 +227,9 @@ TW_INCLUDE_REPACKTOOLS := true
 AB_OTA_UPDATER := true
 
 # Decrittazione FBEv2 (Fondamentale per leggere i dati)
-TW_INCLUDE_CRYPTO := true
-TW_INCLUDE_CRYPTO_FBE := true
-TW_INCLUDE_FBE_METADATA_DECRYPT := true
+# TW_INCLUDE_CRYPTO := true
+# TW_INCLUDE_CRYPTO_FBE := true
+# TW_INCLUDE_FBE_METADATA_DECRYPT := true
 TW_USE_FSCRYPT_POLICY := 2
 TW_NO_HAPTICS := true
 TARGET_USES_MKE2FS := true
@@ -255,3 +255,7 @@ TW_IGNORE_LOGICAL_MOUNT_ERRORS := true
 # MODIFICA AGGIUNTA ORA: Disabilita il riavvio automatico della recovery in caso di errori
 TW_NO_REBOOT_BOOTLOADER := false
 TW_NO_REBOOT_RECOVERY := false
+
+TW_HAS_MTP := true
+BOARD_HAS_NO_REAL_SDCARD := true
+RECOVERY_SDCARD_ON_DATA := true
