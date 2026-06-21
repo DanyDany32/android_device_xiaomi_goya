@@ -261,15 +261,18 @@ BOARD_HAS_NO_REAL_SDCARD := true
 RECOVERY_SDCARD_ON_DATA := true
 
 # ===============================================
-# FIX USB & ADB
+# FIX USB E ADB
 # ===============================================
-TW_EXCLUDE_DEFAULT_USB_INIT := true
 TARGET_RECOVERY_DEFAULT_USB_CONFIG := mtp,adb
-# Inietta la proprietà di sistema per il controller USB di Xiaomi 15T
+TW_INCLUDE_RESETPROP := true
+BOARD_VENDOR_DEFAULT_PROPERTY_OVERRIDES += \
+    sys.usb.controller=11201000.usb0 \
+    sys.usb.configfs=1
 BOARD_KERNEL_CMDLINE += androidboot.usbcontroller=11201000.usb0
 
 # ===============================================
-# FIX TOUCHSCREEN (Forza i moduli kernel)
+# FIX TOUCHSCREEN E KERNEL MODULES
 # ===============================================
-TW_LOAD_VENDOR_MODULES := $(DEVICE_PATH)/vendor_dlkm.modules.load
-TW_LOAD_VENDOR_MODULES_EXCLUDE_GKI := true
+# Forza l'estrazione e il caricamento dei moduli dal ramdisk del vendor
+TW_LOAD_VENDOR_BOOT_MODULES := true
+TW_LOAD_VENDOR_MODULES := $(DEVICE_PATH)/vendor_ramdisk.modules.load.recovery
