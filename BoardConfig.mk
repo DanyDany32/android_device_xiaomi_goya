@@ -79,7 +79,7 @@ BOARD_KERNEL_MODULE_DIR := $(TARGET_KERNEL_DIR)/modules
 BOARD_SYSTEM_KERNEL_MODULES := $(addprefix $(BOARD_KERNEL_MODULE_DIR)/,$(BOARD_SYSTEM_KERNEL_MODULES_LOAD))
 BOARD_VENDOR_KERNEL_MODULES := $(addprefix $(BOARD_KERNEL_MODULE_DIR)/,$(BOARD_VENDOR_KERNEL_MODULES_LOAD))
 
-ALL_VENDOR_RAMDISK_MODULES := $(sort $(BOARD_VENDOR_RAMDISK_KERNEL_MODULES_LOAD) $(BOARD_VENDOR_RAMDISK_RECOVERY_KERNEL_MODULES_LOAD))
+ALL_VENDOR_RAMDISK_MODULES := $(sort $(BOARD_VENDOR_RAMDISK_KERNEL_MODULES_LOAD) $(BOARD_VENDOR_RAMDISK_RECOVERY_KERNEL_MODULES_LOAD) $(BOARD_VENDOR_KERNEL_MODULES_LOAD))
 BOARD_VENDOR_RAMDISK_KERNEL_MODULES := $(addprefix $(BOARD_KERNEL_MODULE_DIR)/,$(ALL_VENDOR_RAMDISK_MODULES))
 
 BOARD_VENDOR_KERNEL_MODULES += \
@@ -261,18 +261,16 @@ BOARD_HAS_NO_REAL_SDCARD := true
 RECOVERY_SDCARD_ON_DATA := true
 
 # ===============================================
-# FIX USB E ADB
+# FIX USB E ADB (Iniettato nel Kernel)
 # ===============================================
 TARGET_RECOVERY_DEFAULT_USB_CONFIG := mtp,adb
-TW_INCLUDE_RESETPROP := true
-BOARD_VENDOR_DEFAULT_PROPERTY_OVERRIDES += \
-    sys.usb.controller=11201000.usb0 \
-    sys.usb.configfs=1
+TW_HAS_MTP := true
+# Inietta l'USB prima che la recovery parta
 BOARD_KERNEL_CMDLINE += androidboot.usbcontroller=11201000.usb0
 
 # ===============================================
 # FIX TOUCHSCREEN E KERNEL MODULES
 # ===============================================
-# Forza l'estrazione e il caricamento dei moduli dal ramdisk del vendor
 TW_LOAD_VENDOR_BOOT_MODULES := true
-TW_LOAD_VENDOR_MODULES := $(DEVICE_PATH)/vendor_ramdisk.modules.load.recovery
+# Carichiamo SIA i moduli base che quelli avanzati (dove Xiaomi nasconde il touch)
+TW_LOAD_VENDOR_MODULES := $(DEVICE_PATH)/vendor_ramdisk.modules.load.recovery $(DEVICE_PATH)/vendor_dlkm.modules.load
