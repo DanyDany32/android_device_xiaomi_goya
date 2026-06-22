@@ -274,13 +274,19 @@ BOARD_VENDOR_DEFAULT_PROPERTY_OVERRIDES += \
     ro.adb.secure=0
 
 # ===============================================
-# FIX TOUCHSCREEN (NOVATEK BYPASS)
+# FIX TOUCHSCREEN (NATIVE EVDEV BYPASS)
 # ===============================================
 TW_LOAD_VENDOR_BOOT_MODULES := true
 TW_LOAD_VENDOR_MODULES := $(DEVICE_PATH)/vendor_ramdisk.modules.load.recovery
-# Forza la recovery a leggere gli input grezzi del Novatek
-TW_INPUT_BLACKLIST := "hbtp_vm"
-TW_CUSTOM_TOUCH_EVENTS := true
-# Le coordinate della Super Risoluzione lette dal tuo log!
-TW_OBOX_X := 1280
-TW_OBOX_Y := 2772
+
+# Disattiviamo i filtri proprietari Xiaomi e usiamo il lettore raw
+TW_INPUT_BLACKLIST := "hbtp_vm\nmtk-pmic-keys"
+RECOVERY_TOUCHSCREEN_SWAP_XY := true
+RECOVERY_TOUCHSCREEN_FLIP_X := true
+RECOVERY_TOUCHSCREEN_FLIP_Y := true
+
+# Diciamo a OrangeFox di non ascoltare driver esterni
+TW_NO_BIND_SYSTEM := true
+
+# Forziamo il caricamento del driver evdev (Fondamentale)
+TARGET_USERIMAGES_USE_EXT4 := true
