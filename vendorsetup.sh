@@ -32,3 +32,6 @@ export OF_STATUS_INDENT_RIGHT=48
 
 # Evita loop dovuti a problemi col touch
 export OF_DISABLE_MIUI_OTA_BY_DEFAULT=1
+
+# Forza i moduli touch nell'elenco di caricamento rapido
+export OF_EXTRA_KERNEL_MODULES="xiaomi_touch_goya.ko nt38771_touch_goya.ko"
