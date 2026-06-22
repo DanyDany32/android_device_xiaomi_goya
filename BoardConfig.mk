@@ -55,24 +55,19 @@ BOARD_MKBOOTIMG_INIT_ARGS += \
     --header_version $(BOARD_INIT_BOOT_HEADER_VERSION)
 
 # ===============================================
-# VECCHIO KERNEL PRECOMPILATO (Disattivato per usare il codice sorgente)
+# KERNEL: MODIFICA PER COMPILAZIONE DA SORGENTE
 # ===============================================
-# BOARD_KERNEL_IMAGE_NAME := Image.lz4
-# BOARD_USES_GENERIC_KERNEL_IMAGE := true
-# TARGET_PREBUILT_KERNEL := $(TARGET_KERNEL_DIR)/$(BOARD_KERNEL_IMAGE_NAME)
-# TARGET_PREBUILT_KERNEL_HEADERS := $(TARGET_KERNEL_DIR)/kernel-uapi-headers.tar.gz
+# (Spento) BOARD_KERNEL_IMAGE_NAME := Image.lz4
+# (Spento) BOARD_USES_GENERIC_KERNEL_IMAGE := true
 
-# ===============================================
-# NUOVA COMPILAZIONE KERNEL DA SORGENTE (MiCode)
-# ===============================================
+# (Acceso) Impostazioni per la compilazione dal codice sorgente Xiaomi
 TARGET_KERNEL_SOURCE := kernel/xiaomi/goya
 TARGET_KERNEL_CONFIG := goya_defconfig
 BOARD_KERNEL_IMAGE_NAME := Image
 TARGET_KERNEL_CLANG_COMPILE := true
-TARGET_KERNEL_CLANG_VERSION := r450784d
 
 # === IL FIX DEL DTB (0 byte) ===
-# (Disattivato: compilando dal sorgente, il DTB viene generato in automatico correttamente)
+# (Spento perché compilando dal sorgente il DTB si genera in automatico)
 # BOARD_INCLUDE_DTB_IN_BOOTIMG := true
 # BOARD_PREBUILT_DTBIMAGE_DIR := device/xiaomi/goya-kernel/dtb_dir
 
@@ -85,6 +80,9 @@ BOARD_SYSTEM_KERNEL_MODULES_LOAD := $(strip $(shell cat $(DEVICE_PATH)/system_dl
 BOARD_VENDOR_KERNEL_MODULES_LOAD := $(strip $(shell cat $(DEVICE_PATH)/vendor_dlkm.modules.load))
 BOARD_VENDOR_RAMDISK_KERNEL_MODULES_LOAD := $(strip $(shell cat $(DEVICE_PATH)/vendor_ramdisk.modules.load))
 BOARD_VENDOR_RAMDISK_RECOVERY_KERNEL_MODULES_LOAD := $(strip $(shell cat $(DEVICE_PATH)/vendor_ramdisk.modules.load.recovery))
+
+# (Spento) TARGET_PREBUILT_KERNEL := $(TARGET_KERNEL_DIR)/$(BOARD_KERNEL_IMAGE_NAME)
+# (Spento) TARGET_PREBUILT_KERNEL_HEADERS := $(TARGET_KERNEL_DIR)/kernel-uapi-headers.tar.gz
 
 # BOARD_KERNEL_MODULE_DIR := $(TARGET_KERNEL_DIR)
 BOARD_KERNEL_MODULE_DIR := $(TARGET_KERNEL_DIR)/modules
