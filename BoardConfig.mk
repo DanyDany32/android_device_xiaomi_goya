@@ -239,10 +239,9 @@ TW_SCREEN_BLANK_ON_BOOT := true
 # ===============================================
 # ANTI-FREEZE & GUI DEADLOCK FIX
 # ===============================================
-# Forza il refresh dello schermo e impedisce il blocco sul logo
-TARGET_RECOVERY_UI_BLANK_UNBLANK_ON_INIT := true
-TW_NO_SCREEN_BLANK := false
-TW_NO_SCREEN_TIMEOUT := false
+TARGET_RECOVERY_UI_BLANK_UNBLANK_ON_INIT := false
+TW_NO_SCREEN_BLANK := true
+TW_NO_SCREEN_TIMEOUT := true
 
 # FIX SCHERMO E DRM (MEDIATEK DIMENSITY)
 TARGET_USES_MINUI_DRM := true
