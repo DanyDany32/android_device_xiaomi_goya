@@ -274,8 +274,13 @@ BOARD_VENDOR_DEFAULT_PROPERTY_OVERRIDES += \
     ro.adb.secure=0
 
 # ===============================================
-# FIX TOUCHSCREEN E KERNEL MODULES
+# FIX TOUCHSCREEN (NOVATEK BYPASS)
 # ===============================================
 TW_LOAD_VENDOR_BOOT_MODULES := true
-# Carichiamo SIA i moduli base che quelli avanzati (dove Xiaomi nasconde il touch)
 TW_LOAD_VENDOR_MODULES := $(DEVICE_PATH)/vendor_ramdisk.modules.load.recovery
+# Forza la recovery a leggere gli input grezzi del Novatek
+TW_INPUT_BLACKLIST := "hbtp_vm"
+TW_CUSTOM_TOUCH_EVENTS := true
+# Le coordinate della Super Risoluzione lette dal tuo log!
+TW_OBOX_X := 1280
+TW_OBOX_Y := 2772
