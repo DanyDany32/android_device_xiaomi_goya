@@ -1,25 +1,21 @@
-on boot
-    # Diamogli 2 secondi per caricare i moduli .ko
-    sleep 2
+# Dichiariamo il servizio originale Xiaomi
+service touchfeature-service /vendor/bin/hw/vendor.xiaomi.hw.touchfeature-service
+    class core
+    user root
+    group root system input
+    seclabel u:r:recovery:s0
 
-    # Ripristiniamo i permessi base (come fa HyperOS)
+on boot
+    # Diamo tempo ai driver (.ko) di caricarsi in memoria
+    sleep 1
+    
+    # Diamo i permessi ai file per farsi leggere dal demone
     chmod 0666 /dev/xiaomi-touch
     chmod 0666 /sys/class/touch/touch_dev/panel_display
     chmod 0666 /sys/class/touch/touch_dev/suspend_state
     chmod 0666 /sys/class/touch/touch_dev/touch_doze_analysis
     chmod 0666 /sys/class/touch/touch_dev/palm_sensor
     chmod 0666 /sys/class/touch/touch_dev/enable_touch_raw
-    chmod 0666 /sys/class/touch/touch_dev/touch_active_status
-
-    # Spegniamo tutti i filtri di sicurezza e le "tasche"
-    write /sys/class/touch/touch_dev/palm_sensor 0
-    write /sys/class/touch/touch_dev/touch_doze_analysis 0
-    write /sys/class/touch/touch_dev/enable_touch_raw 0
-
-    # Svegliamo il sensore (Simuliamo l'accensione dello schermo)
-    write /sys/class/touch/touch_dev/suspend_state 0
-    write /sys/class/touch/touch_dev/panel_display 1
-    write /sys/class/touch/touch_dev/touch_active_status 1
-
-    # Diamo una scossa di reset per ricaricare il firmware
-    write /proc/xm_htc_sw_reset 1
+    
+    # AVVIAMO IL DEMONE
+    start touchfeature-service
