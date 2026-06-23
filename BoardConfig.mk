@@ -19,7 +19,6 @@ TARGET_NO_BOOTLOADER := true
 
 # Display
 TARGET_SCREEN_DENSITY := 520
-# TARGET_USES_VULKAN := true
 
 # Kernel
 BOARD_BOOT_HEADER_VERSION := 4
@@ -55,25 +54,25 @@ BOARD_MKBOOTIMG_INIT_ARGS += \
     --header_version $(BOARD_INIT_BOOT_HEADER_VERSION)
 
 # ===============================================
-# KERNEL: MODIFICA PER COMPILAZIONE DA SORGENTE
+# KERNEL PRECOMPILATO (ATTIVO)
 # ===============================================
-# (Spento) BOARD_KERNEL_IMAGE_NAME := Image.lz4
-# (Spento) BOARD_USES_GENERIC_KERNEL_IMAGE := true
+BOARD_KERNEL_IMAGE_NAME := Image.lz4
+BOARD_USES_GENERIC_KERNEL_IMAGE := true
+TARGET_PREBUILT_KERNEL := $(TARGET_KERNEL_DIR)/$(BOARD_KERNEL_IMAGE_NAME)
+TARGET_PREBUILT_KERNEL_HEADERS := $(TARGET_KERNEL_DIR)/kernel-uapi-headers.tar.gz
 
-# (Acceso) Impostazioni per la compilazione dal codice sorgente Xiaomi
-TARGET_KERNEL_SOURCE := kernel/xiaomi/goya
-TARGET_KERNEL_CONFIG := goya_defconfig
-BOARD_KERNEL_IMAGE_NAME := Image
-TARGET_KERNEL_CLANG_COMPILE := true
+# ===============================================
+# COMPILAZIONE KERNEL DA SORGENTE (DISATTIVATA)
+# ===============================================
+# TARGET_KERNEL_SOURCE := kernel/xiaomi/goya
+# TARGET_KERNEL_CONFIG := goya_defconfig
+# BOARD_KERNEL_IMAGE_NAME := Image
+# TARGET_KERNEL_CLANG_COMPILE := true
 
 # === IL FIX DEL DTB (0 byte) ===
-# (Spento perché compilando dal sorgente il DTB si genera in automatico)
-# BOARD_INCLUDE_DTB_IN_BOOTIMG := true
-# BOARD_PREBUILT_DTBIMAGE_DIR := device/xiaomi/goya-kernel/dtb_dir
+BOARD_INCLUDE_DTB_IN_BOOTIMG := true
+BOARD_PREBUILT_DTBIMAGE_DIR := device/xiaomi/goya-kernel/dtb_dir
 
-# TARGET_KERNEL_DEVICE := mgk_64_k66
-# TARGET_KERNEL_DIR := $(KERNEL_PATH)/6.6
-# TARGET_KERNEL_PLATFORM_SOURCE := kernel_device_modules-6.6
 TARGET_KERNEL_DIR := $(KERNEL_PATH)
 
 BOARD_SYSTEM_KERNEL_MODULES_LOAD := $(strip $(shell cat $(DEVICE_PATH)/system_dlkm.modules.load))
@@ -81,10 +80,6 @@ BOARD_VENDOR_KERNEL_MODULES_LOAD := $(strip $(shell cat $(DEVICE_PATH)/vendor_dl
 BOARD_VENDOR_RAMDISK_KERNEL_MODULES_LOAD := $(strip $(shell cat $(DEVICE_PATH)/vendor_ramdisk.modules.load))
 BOARD_VENDOR_RAMDISK_RECOVERY_KERNEL_MODULES_LOAD := $(strip $(shell cat $(DEVICE_PATH)/vendor_ramdisk.modules.load.recovery))
 
-# (Spento) TARGET_PREBUILT_KERNEL := $(TARGET_KERNEL_DIR)/$(BOARD_KERNEL_IMAGE_NAME)
-# (Spento) TARGET_PREBUILT_KERNEL_HEADERS := $(TARGET_KERNEL_DIR)/kernel-uapi-headers.tar.gz
-
-# BOARD_KERNEL_MODULE_DIR := $(TARGET_KERNEL_DIR)
 BOARD_KERNEL_MODULE_DIR := $(TARGET_KERNEL_DIR)/modules
 BOARD_SYSTEM_KERNEL_MODULES := $(addprefix $(BOARD_KERNEL_MODULE_DIR)/,$(BOARD_SYSTEM_KERNEL_MODULES_LOAD))
 BOARD_VENDOR_KERNEL_MODULES := $(addprefix $(BOARD_KERNEL_MODULE_DIR)/,$(BOARD_VENDOR_KERNEL_MODULES_LOAD))
@@ -132,7 +127,7 @@ BOARD_SUPER_PARTITION_GROUPS := xiaomi_dynamic_partitions
 BOARD_XIAOMI_DYNAMIC_PARTITIONS_PARTITION_LIST := system product system_ext vendor odm system_dlkm vendor_dlkm odm_dlkm
 BOARD_XIAOMI_DYNAMIC_PARTITIONS_SIZE := $(shell expr $(BOARD_SUPER_PARTITION_SIZE) - 4194304)
 
-# MODIFICA 1: File system uniformato a ext4 per bypassare i controlli AOSP (invece di erofs)
+# MODIFICA 1: File system uniformato a ext4 per bypassare i controlli AOSP
 BOARD_PRODUCTIMAGE_FILE_SYSTEM_TYPE := ext4
 BOARD_SYSTEMIMAGE_FILE_SYSTEM_TYPE := ext4
 BOARD_SYSTEM_EXTIMAGE_FILE_SYSTEM_TYPE := ext4
@@ -142,11 +137,6 @@ BOARD_SYSTEM_DLKMIMAGE_FILE_SYSTEM_TYPE := ext4
 BOARD_VENDOR_DLKMIMAGE_FILE_SYSTEM_TYPE := ext4
 BOARD_ODM_DLKMIMAGE_FILE_SYSTEM_TYPE := ext4
 
-# BOARD_EROFS_COMPRESS_HINTS := $(DEVICE_PATH)/configs/partitions/erofs_compress_hints.txt
-# BOARD_EROFS_PCLUSTER_SIZE := 262144
-# PRODUCT_FS_COMPRESSION := 1
-
-# MODIFICA 2: I copy_out sono stati uniti sopra o gestiti da Lineage, ho "spento" i doppioni per non causare errori di Make
 TARGET_COPY_OUT_ODM := odm
 TARGET_COPY_OUT_ODM_DLKM := odm_dlkm
 TARGET_COPY_OUT_PRODUCT := product
@@ -161,11 +151,6 @@ BOARD_INCLUDE_RECOVERY_RAMDISK_IN_VENDOR_BOOT := true
 TARGET_RECOVERY_FSTAB := $(DEVICE_PATH)/init/fstab.mt6899
 TARGET_RECOVERY_PIXEL_FORMAT := RGBX_8888
 TARGET_USERIMAGES_USE_F2FS := true
-
-# SEPolicy
-# BOARD_VENDOR_SEPOLICY_DIRS += $(DEVICE_PATH)/sepolicy/vendor
-# SYSTEM_EXT_PRIVATE_SEPOLICY_DIRS += $(DEVICE_PATH)/sepolicy/private
-# SYSTEM_EXT_PUBLIC_SEPOLICY_DIRS += $(DEVICE_PATH)/sepolicy/public
 
 # Verified Boot
 BOARD_AVB_ENABLE := true
@@ -188,15 +173,6 @@ BOARD_AVB_VBMETA_VENDOR_ALGORITHM := SHA256_RSA4096
 BOARD_AVB_VBMETA_VENDOR_KEY_PATH := external/avb/test/data/testkey_rsa4096.pem
 BOARD_AVB_VBMETA_VENDOR_ROLLBACK_INDEX := 0
 BOARD_AVB_VBMETA_VENDOR_ROLLBACK_INDEX_LOCATION := 4
-
-# VINTF
-# DEVICE_FRAMEWORK_COMPATIBILITY_MATRIX_FILE += \
-#     hardware/mediatek/vintf/mediatek_framework_compatibility_matrix_aidl.xml \
-#     hardware/xiaomi/vintf/xiaomi_framework_compatibility_matrix.xml \
-#     $(DEVICE_PATH)/device_framework_matrix.xml
-# DEVICE_MANIFEST_FILE += $(DEVICE_PATH)/manifest.xml
-# DEVICE_MATRIX_FILE += $(DEVICE_PATH)/compatibility_matrix.xml
-# ODM_MANIFEST_FILES += $(DEVICE_PATH)/manifest_odm.xml
 
 # Wifi
 BOARD_WLAN_DEVICE := MediaTek
@@ -222,7 +198,7 @@ WIFI_FEATURE_HOSTAPD_11AX := true
 WIFI_FEATURE_SUPPLICANT_11AX := true
 
 # ===============================================
-# MODIFICA 3: AGGIUNTE ORANGEFOX E DECRITTAZIONE
+# ORANGEFOX CONFIGS
 # ===============================================
 TW_THEME := portrait_hdpi
 TARGET_SCREEN_WIDTH := 1220
@@ -231,15 +207,10 @@ TW_MAX_BRIGHTNESS := 2047
 TW_DEFAULT_BRIGHTNESS := 1200
 TW_HAS_EDL_MODE := true
 
-# Tool e Virtual A/B
 TW_INCLUDE_FASTBOOTD := true
 TW_INCLUDE_REPACKTOOLS := true
 AB_OTA_UPDATER := true
 
-# Decrittazione FBEv2 (Fondamentale per leggere i dati)
-# TW_INCLUDE_CRYPTO := true
-# TW_INCLUDE_CRYPTO_FBE := true
-# TW_INCLUDE_FBE_METADATA_DECRYPT := true
 TW_USE_FSCRYPT_POLICY := 2
 TW_NO_HAPTICS := true
 TARGET_USES_MKE2FS := true
@@ -253,15 +224,12 @@ TARGET_RECOVERY_UI_BLANK_UNBLANK_ON_INIT := false
 TW_NO_SCREEN_BLANK := true
 TW_NO_SCREEN_TIMEOUT := true
 
-# FIX SCHERMO E DRM (MEDIATEK DIMENSITY)
 TARGET_USES_MINUI_DRM := true
 TARGET_USES_DRM_PP := true
 TW_OBOX_DISPLAY := true
 
-# Disabilita funzioni che causano loop infiniti su kernel A15
 TW_EXCLUDE_APEX := true
 TW_IGNORE_LOGICAL_MOUNT_ERRORS := true
-# MODIFICA AGGIUNTA ORA: Disabilita il riavvio automatico della recovery in caso di errori
 TW_NO_REBOOT_BOOTLOADER := false
 TW_NO_REBOOT_RECOVERY := false
 
@@ -284,7 +252,7 @@ BOARD_VENDOR_DEFAULT_PROPERTY_OVERRIDES += \
     ro.adb.secure=0
 
 # ===============================================
-# FIX TOUCHSCREEN E MODULI SORGENTE
+# FIX TOUCHSCREEN (NATIVE EVDEV BYPASS E RISOLUZIONE)
 # ===============================================
 TW_LOAD_VENDOR_BOOT_MODULES := true
 TW_LOAD_VENDOR_MODULES := $(DEVICE_PATH)/vendor_ramdisk.modules.load.recovery
@@ -295,8 +263,9 @@ RECOVERY_TOUCHSCREEN_SWAP_XY := true
 RECOVERY_TOUCHSCREEN_FLIP_X := true
 RECOVERY_TOUCHSCREEN_FLIP_Y := true
 
-# Diciamo a OrangeFox di non ascoltare driver esterni
-TW_NO_BIND_SYSTEM := true
+# Forziamo la risoluzione letta dal Kernel per mappare i tocchi
+TW_OBOX_X := 1280
+TW_OBOX_Y := 2772
 
-# Forziamo il caricamento del driver evdev (Fondamentale)
+TW_NO_BIND_SYSTEM := true
 TARGET_USERIMAGES_USE_EXT4 := true
