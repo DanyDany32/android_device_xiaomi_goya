@@ -257,15 +257,15 @@ BOARD_VENDOR_DEFAULT_PROPERTY_OVERRIDES += \
 TW_LOAD_VENDOR_BOOT_MODULES := true
 TW_LOAD_VENDOR_MODULES := $(DEVICE_PATH)/vendor_ramdisk.modules.load.recovery
 
-# Disattiviamo i filtri proprietari Xiaomi e usiamo il lettore raw
 TW_INPUT_BLACKLIST := "hbtp_vm\nmtk-pmic-keys"
 RECOVERY_TOUCHSCREEN_SWAP_XY := true
 RECOVERY_TOUCHSCREEN_FLIP_X := true
 RECOVERY_TOUCHSCREEN_FLIP_Y := true
-
-# Forziamo la risoluzione letta dal Kernel per mappare i tocchi
 TW_OBOX_X := 1280
 TW_OBOX_Y := 2772
+
+# ---> AGGIUNGI QUESTA RIGA: Attiva il finto servizio MIUI per il touch
+TARGET_USES_XIAOMI_TOUCHFEATURE := true
 
 TW_NO_BIND_SYSTEM := true
 TARGET_USERIMAGES_USE_EXT4 := true
