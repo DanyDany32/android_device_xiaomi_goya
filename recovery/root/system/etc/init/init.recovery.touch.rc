@@ -1,17 +1,25 @@
 on boot
-    # Aspettiamo 1 secondo che i moduli .ko vengano caricati
-    sleep 1
+    # Diamogli 2 secondi per caricare i moduli .ko
+    sleep 2
 
-    # Diciamo al driver che il display è acceso
-    write /sys/class/touch/touch_dev/panel_display 1
-    write /sys/devices/virtual/touch/touch_dev/panel_display 1
+    # Ripristiniamo i permessi base (come fa HyperOS)
+    chmod 0666 /dev/xiaomi-touch
+    chmod 0666 /sys/class/touch/touch_dev/panel_display
+    chmod 0666 /sys/class/touch/touch_dev/suspend_state
+    chmod 0666 /sys/class/touch/touch_dev/touch_doze_analysis
+    chmod 0666 /sys/class/touch/touch_dev/palm_sensor
+    chmod 0666 /sys/class/touch/touch_dev/enable_touch_raw
+    chmod 0666 /sys/class/touch/touch_dev/touch_active_status
 
-    # Spegniamo il sensore della tasca (palm_sensor)
+    # Spegniamo tutti i filtri di sicurezza e le "tasche"
     write /sys/class/touch/touch_dev/palm_sensor 0
-    write /sys/devices/virtual/touch/touch_dev/palm_sensor 0
-
-    # Spegniamo il risparmio energetico
     write /sys/class/touch/touch_dev/touch_doze_analysis 0
+    write /sys/class/touch/touch_dev/enable_touch_raw 0
 
-    # Forziamo il reset software del chip Novatek
+    # Svegliamo il sensore (Simuliamo l'accensione dello schermo)
+    write /sys/class/touch/touch_dev/suspend_state 0
+    write /sys/class/touch/touch_dev/panel_display 1
+    write /sys/class/touch/touch_dev/touch_active_status 1
+
+    # Diamo una scossa di reset per ricaricare il firmware
     write /proc/xm_htc_sw_reset 1
