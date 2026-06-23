@@ -1,0 +1,17 @@
+on boot
+    # Aspettiamo 1 secondo che i moduli .ko vengano caricati
+    sleep 1
+
+    # Diciamo al driver che il display è acceso
+    write /sys/class/touch/touch_dev/panel_display 1
+    write /sys/devices/virtual/touch/touch_dev/panel_display 1
+
+    # Spegniamo il sensore della tasca (palm_sensor)
+    write /sys/class/touch/touch_dev/palm_sensor 0
+    write /sys/devices/virtual/touch/touch_dev/palm_sensor 0
+
+    # Spegniamo il risparmio energetico
+    write /sys/class/touch/touch_dev/touch_doze_analysis 0
+
+    # Forziamo il reset software del chip Novatek
+    write /proc/xm_htc_sw_reset 1
