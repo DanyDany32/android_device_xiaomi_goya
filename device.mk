@@ -12,6 +12,10 @@ PRODUCT_MODEL := 25069PTEBG
 PRODUCT_MANUFACTURER := Xiaomi
 PRODUCT_NAME := omni_goya
 
+# BoardConfig.mk cannot assign PRODUCT_* variables: the build system marks them
+# readonly after product configuration. Soong namespaces belong here.
+PRODUCT_SOONG_NAMESPACES += $(DEVICE_PATH)
+
 PRODUCT_USE_DYNAMIC_PARTITIONS := true
 PRODUCT_USE_VIRTUAL_AB := true
 PRODUCT_VIRTUAL_AB_OTA := true

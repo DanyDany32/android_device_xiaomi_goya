@@ -94,7 +94,10 @@ BOARD_XIAOMI_DYNAMIC_PARTITIONS_PARTITION_LIST := \
     vendor_dlkm \
     odm_dlkm
 
-# A/B / virtual A/B
+# A/B / virtual A/B. PRODUCT_USE_DYNAMIC_PARTITIONS and the virtual A/B flags
+# are product variables and are set in device.mk: the build system marks every
+# PRODUCT_* variable readonly once product configuration is resolved, so they
+# cannot be assigned from BoardConfig.mk.
 AB_OTA_UPDATER := true
 AB_OTA_PARTITIONS += \
     boot \
@@ -113,11 +116,6 @@ AB_OTA_PARTITIONS += \
     odm \
     odm_dlkm \
     pvmfw
-
-PRODUCT_USE_DYNAMIC_PARTITIONS := true
-PRODUCT_USE_VIRTUAL_AB := true
-PRODUCT_VIRTUAL_AB_OTA := true
-PRODUCT_VIRTUAL_AB_COMPRESSION := true
 
 # AVB
 BOARD_AVB_ENABLE := true
@@ -162,7 +160,5 @@ TW_RECOVERY_ADDITIONAL_RELINK_LIBRARY_FILES = \
 # Keep the image lean. The recovery fragment only carries the touch, haptic
 # and SCP modules that are absent from the stock platform fragment.
 BOARD_RECOVERY_IMAGE_PREPARE = bash $(DEVICE_PATH)/fox_callback.sh $(TARGET_RECOVERY_ROOT_OUT) --first-call
-
-PRODUCT_SOONG_NAMESPACES += $(DEVICE_PATH)
 
 -include $(DEVICE_PATH)/fox_goya.mk
