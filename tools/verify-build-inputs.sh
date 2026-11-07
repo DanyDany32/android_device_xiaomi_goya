@@ -454,7 +454,9 @@ fi
 blobs_mk="${DEVICE_DIR}/proprietary/blobs.mk"
 if [ -f "$blobs_mk" ]; then
     while IFS= read -r relative; do
-        [ -n "$relative" ] && check_file "${DEVICE_DIR}/${relative}"
+        if [ -n "$relative" ]; then
+            check_file "${DEVICE_DIR}/${relative}"
+        fi
     done < <(sed -n 's#.*\$(DEVICE_PATH)/\([^:[:space:]]*\):.*#\1#p' "$blobs_mk" | sort -u)
     duplicate_destinations="$(sed -n 's#.*\$(DEVICE_PATH)/[^:]*:\([^[:space:]\\]*\).*#\1#p' "$blobs_mk" | sort | uniq -d)"
     if [ -n "$duplicate_destinations" ]; then
@@ -513,4 +515,6 @@ fi
 
 echo "goya build input verification passed"
 echo "Device tree: ${DEVICE_DIR}"
-[ -n "$TOP_DIR" ] && echo "OrangeFox:   ${TOP_DIR}"
+if [ -n "$TOP_DIR" ]; then
+    echo "OrangeFox:   ${TOP_DIR}"
+fi

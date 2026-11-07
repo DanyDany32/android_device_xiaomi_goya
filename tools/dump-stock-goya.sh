@@ -243,7 +243,9 @@ copy_glob_optional '/vendor/firmware/aw8697_*.bin'
         ro.build.version.security_patch \
         ro.system.build.fingerprint; do
         value="$(getprop "$prop" 2>/dev/null || true)"
-        [ -n "$value" ] && echo "${prop}=${value}"
+        if [ -n "$value" ]; then
+            echo "${prop}=${value}"
+        fi
     done
 } > "$META/build-info.txt"
 

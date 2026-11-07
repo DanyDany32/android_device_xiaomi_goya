@@ -60,7 +60,8 @@ fi
 
 # Reuse the stock recovery first-stage list (display, UFS, USB and the MTK
 # mailbox/IPI trio). It is extracted by prepare-stock-vendor-boot.sh from the
-# stock recovery fragment. The recovery-only touch/haptic/SCP modules are
+# stock platform fragment (vendor_ramdisk00), with the recovery fragment as a
+# fallback for other layouts. The recovery-only touch/haptic/SCP modules are
 # intentionally not listed: load-touch-modules.sh loads them during early-boot
 # after checking that the SPI controller is present.
 stock_recovery_modules="$device_dir/prebuilt/vendor-boot/modules.load.recovery"
