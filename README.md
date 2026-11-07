@@ -44,12 +44,14 @@ la presenza dei blob per una release completa.
 Host Linux (o GitHub Actions Ubuntu 24.04) per la build OrangeFox:
 
 - 16 GB di RAM e almeno 12 GB di swap;
-- spazio disco: la sync depth-1 arriva a circa 71-74 GiB con `.repo`, quindi
-  il workflow richiede 90 GiB liberi su un runner a disco singolo, oppure
-  70 GiB su un eventuale `/mnt` separato più 38 GiB per `out/`. I runner
-  pubblici 4-core hanno un disco da 150 GB (circa 127 GiB liberi dopo il
-  cleanup); se il runner assegnato è più piccolo il workflow si ferma prima
-  della sync invece di riempire il disco;
+- spazio disco: misurato su un runner sano da 145 GB, la sync depth-1 porta
+  l'uso da 19 GiB a un picco di 99 GiB (circa 80 GiB di dati nuovi, `.repo`
+  incluso). Il workflow richiede quindi **115 GiB liberi** su un runner a
+  disco singolo, oppure 100 GiB su un `/mnt` separato più 45 GiB per `out/`.
+  I runner pubblici 4-core hanno un disco da 150 GB (circa 127 GiB liberi
+  dopo il cleanup); se il runner assegnato è più piccolo il workflow si ferma
+  prima della sync, e un watchdog interrompe comunque la sync se lo spazio
+  scende sotto 8 GiB, così i log vengono salvati;
 - runner GitHub **pubblico 4-core**: i runner privati 2-core hanno circa 14 GiB
   liberi e non bastano;
 - `git`, `repo`, `python3`, `cpio`, `lz4`, `avbtool`, `mkbootimg`, `java 17`.

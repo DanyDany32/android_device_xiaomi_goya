@@ -94,15 +94,15 @@ jobs:
           rm -rf "$build_root" /mnt/goya-orangefox "$GITHUB_WORKSPACE/goya-out"
 
           # Public ubuntu-24.04 runners come in two layouts: a single large
-          # root disk, or a small root disk plus a separate ~74 GiB /mnt disk.
-          # Repository sync and the build output do not both fit on the small
-          # root disk. Put the OrangeFox tree on /mnt and keep out/ on the root
-          # disk so each filesystem keeps headroom, including during a sync
-          # retry.
-          if mountpoint -q /mnt; then
+          # root disk, or a small root disk plus a separate /mnt disk.
+          # Repository sync peaks at about 80 GiB of new data, so a small /mnt
+          # cannot hold it either. Only use /mnt when it is a distinct
+          # filesystem with real headroom; otherwise stay on the root disk.
+          if mountpoint -q /mnt && \
+             [[ "$(stat -c %d /mnt)" != "$(stat -c %d "$GITHUB_WORKSPACE")" ]]; then
             mnt_available_kib="$(df -Pk /mnt | awk 'NR == 2 { print $4 }')"
             if [[ -n "${mnt_available_kib}" && \
-                  "${mnt_available_kib}" -ge $((70 * 1024 * 1024)) ]]; then
+                  "${mnt_available_kib}" -ge $((100 * 1024 * 1024)) ]]; then
               sudo mkdir -p /mnt/goya-orangefox
               sudo chown "$(id -u):$(id -g)" /mnt/goya-orangefox
               ln -s /mnt/goya-orangefox "$build_root"
@@ -185,14 +185,16 @@ jobs:
           if [[ "$GOYA_BUILD_LAYOUT" = "split" ]]; then
             # The source tree and .repo live on /mnt; .repo is deleted before
             # the build. out/ stays on the root disk.
-            source_required_kib=$((70 * 1024 * 1024))
-            out_required_kib=$((38 * 1024 * 1024))
+            source_required_kib=$((100 * 1024 * 1024))
+            out_required_kib=$((45 * 1024 * 1024))
           else
-            # A single disk must hold the depth-1 sync (measured ~71-74 GiB
-            # with .repo) plus out/; deleting .repo before the build frees
-            # roughly 20-30 GiB again.
-            source_required_kib=$((90 * 1024 * 1024))
-            out_required_kib=$((38 * 1024 * 1024))
+            # Measured on a healthy 145 GB runner: 19 GiB baseline after the
+            # image cleanup and swap, then 80 GiB of new data at the sync peak
+            # (99 GiB used, 46 GiB free). Requiring 115 GiB keeps ~35 GiB of
+            # margin for sync retries; deleting .repo before the build frees
+            # another 20-30 GiB for out/.
+            source_required_kib=$((115 * 1024 * 1024))
+            out_required_kib=$((45 * 1024 * 1024))
           fi
 
           if [[ -z "${source_available_kib}" || \
@@ -289,9 +291,31 @@ jobs:
           trap 'kill "$heartbeat_pid" 2>/dev/null || true' EXIT
 
           sync_succeeded=0
+          low_space=0
           for sync_attempt in 1 2 3; do
-            if repo sync -c -j4 --retry-fetches=3 \
-              --no-clone-bundle --no-tags --optimized-fetch; then
+            repo sync -c -j4 --retry-fetches=3 \
+              --no-clone-bundle --no-tags --optimized-fetch &
+            sync_pid=$!
+
+            while kill -0 "$sync_pid" 2>/dev/null; do
+              avail_kib="$(df -Pk "$GOYA_SOURCE_ROOT" | awk 'NR == 2 { print $4 }')"
+              if [[ -n "${avail_kib}" && "${avail_kib}" -lt $((8 * 1024 * 1024)) ]]; then
+                echo "::error::Free space on ${GOYA_SOURCE_ROOT} fell below 8 GiB during the source sync; aborting now so the runner can still upload its logs."
+                pkill -KILL -P "$sync_pid" 2>/dev/null || true
+                kill -KILL "$sync_pid" 2>/dev/null || true
+                low_space=1
+                break
+              fi
+              sleep 20
+            done
+
+            sync_rc=0
+            wait "$sync_pid" 2>/dev/null || sync_rc=$?
+
+            if [[ "$low_space" -eq 1 ]]; then
+              break
+            fi
+            if [[ "$sync_rc" -eq 0 ]]; then
               sync_succeeded=1
               break
             fi
@@ -301,6 +325,10 @@ jobs:
               sleep "$delay_seconds"
             fi
           done
+          if [[ "$low_space" -eq 1 ]]; then
+            echo "::error::OrangeFox source sync stopped because the runner disk is too small for the 80 GiB sync peak. Re-run the workflow to get a 150 GB-class runner." >&2
+            exit 1
+          fi
           if [[ "$sync_succeeded" -ne 1 ]]; then
             echo "::error::OrangeFox source sync failed after three complete attempts." >&2
             exit 1
@@ -365,7 +393,7 @@ jobs:
           set -euo pipefail
 
           available_kib="$(df -Pk "$GOYA_OUT_ROOT" | awk 'NR == 2 { print $4 }')"
-          required_kib=$((38 * 1024 * 1024))
+          required_kib=$((45 * 1024 * 1024))
           if [[ -z "${available_kib}" || "${available_kib}" -lt "${required_kib}" ]]; then
             echo "::error::OrangeFox goya needs at least $((required_kib / 1024 / 1024)) GiB free for out/ in ${GOYA_OUT_ROOT} after .repo cleanup; found $((available_kib / 1024 / 1024)) GiB."
             exit 1
