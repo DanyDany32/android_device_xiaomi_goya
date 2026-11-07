@@ -71,6 +71,8 @@ jobs:
         run: |
           set -euo pipefail
           rm -rf "$ORANGEFOX_TOP" \
+            /mnt/goya-orangefox \
+            "$GITHUB_WORKSPACE/goya-out" \
             "$GITHUB_WORKSPACE/ofox-sync" \
             "$GITHUB_WORKSPACE/pinned-manifest" \
             "$GITHUB_WORKSPACE/artifacts"
@@ -79,6 +81,54 @@ jobs:
 
       - name: Free disk space
         uses: rokibhasansagar/slimhub_actions@c2a6e4317d3de2b623ac7395b05e9d2149e8289b
+
+      - name: Select build filesystem
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          build_root="$GITHUB_WORKSPACE/OrangeFox"
+          out_root="$build_root/out"
+          layout="single"
+
+          rm -rf "$build_root" /mnt/goya-orangefox "$GITHUB_WORKSPACE/goya-out"
+
+          # Public ubuntu-24.04 runners come in two layouts: a single large
+          # root disk, or a small root disk plus a separate ~74 GiB /mnt disk.
+          # Repository sync and the build output do not both fit on the small
+          # root disk. Put the OrangeFox tree on /mnt and keep out/ on the root
+          # disk so each filesystem keeps headroom, including during a sync
+          # retry.
+          if mountpoint -q /mnt; then
+            mnt_available_kib="$(df -Pk /mnt | awk 'NR == 2 { print $4 }')"
+            if [[ -n "${mnt_available_kib}" && \
+                  "${mnt_available_kib}" -ge $((70 * 1024 * 1024)) ]]; then
+              sudo mkdir -p /mnt/goya-orangefox
+              sudo chown "$(id -u):$(id -g)" /mnt/goya-orangefox
+              ln -s /mnt/goya-orangefox "$build_root"
+              mkdir -p "$GITHUB_WORKSPACE/goya-out"
+              ln -s "$GITHUB_WORKSPACE/goya-out" "$out_root"
+              layout="split"
+              echo "Source tree on /mnt (separate disk), out/ on the root disk"
+            fi
+          fi
+
+          if [[ "$layout" = "single" ]]; then
+            mkdir -p "$build_root" "$out_root"
+            echo "Single-disk runner: source tree and out/ on the root disk"
+          fi
+
+          source_real="$(realpath "$build_root")"
+          out_real="$(realpath "$out_root")"
+          {
+            echo "GOYA_BUILD_LAYOUT=$layout"
+            echo "GOYA_SOURCE_ROOT=$source_real"
+            echo "GOYA_OUT_ROOT=$out_real"
+          } >> "$GITHUB_ENV"
+
+          nproc
+          df -h "$source_real" "$out_real"
+          df -i "$source_real" "$out_real"
 
       - name: Install host packages
         shell: bash
@@ -123,15 +173,40 @@ jobs:
         run: |
           set -euo pipefail
 
-          available_kib="$(df -Pk "$GITHUB_WORKSPACE" | awk 'NR == 2 { print $4 }')"
-          # 70 GiB after swap covers the ~40 GiB peak of the depth-1 repo sync
-          # plus margin. Public 4-core runners leave roughly 78 GiB here; a
-          # higher threshold would reject them, while 2-core runners (~14 GiB)
-          # still fail early as intended.
-          required_kib=$((70 * 1024 * 1024))
-          if [[ -z "${available_kib}" || "${available_kib}" -lt "${required_kib}" ]]; then
-            echo "::error::OrangeFox goya needs at least 70 GiB free after image cleanup and swap; found $((available_kib / 1024 / 1024)) GiB. Use a public 4-core ubuntu-24.04 runner."
+          if [[ -z "${GOYA_BUILD_LAYOUT:-}" || -z "${GOYA_SOURCE_ROOT:-}" || \
+                -z "${GOYA_OUT_ROOT:-}" ]]; then
+            echo "::error::build filesystem selection did not produce usable paths"
             exit 1
+          fi
+
+          source_available_kib="$(df -Pk "$GOYA_SOURCE_ROOT" | awk 'NR == 2 { print $4 }')"
+          out_available_kib="$(df -Pk "$GOYA_OUT_ROOT" | awk 'NR == 2 { print $4 }')"
+
+          if [[ "$GOYA_BUILD_LAYOUT" = "split" ]]; then
+            # The source tree and .repo live on /mnt; .repo is deleted before
+            # the build. out/ stays on the root disk.
+            source_required_kib=$((70 * 1024 * 1024))
+            out_required_kib=$((38 * 1024 * 1024))
+          else
+            # A single disk must hold the depth-1 sync (measured ~71-74 GiB
+            # with .repo) plus out/; deleting .repo before the build frees
+            # roughly 20-30 GiB again.
+            source_required_kib=$((90 * 1024 * 1024))
+            out_required_kib=$((38 * 1024 * 1024))
+          fi
+
+          if [[ -z "${source_available_kib}" || \
+                "${source_available_kib}" -lt "${source_required_kib}" ]]; then
+            echo "::error::OrangeFox goya needs at least $((source_required_kib / 1024 / 1024)) GiB free for the source tree in ${GOYA_SOURCE_ROOT}; found $((source_available_kib / 1024 / 1024)) GiB (layout ${GOYA_BUILD_LAYOUT})."
+            exit 1
+          fi
+
+          if [[ "$GOYA_BUILD_LAYOUT" = "split" ]]; then
+            if [[ -z "${out_available_kib}" || \
+                  "${out_available_kib}" -lt "${out_required_kib}" ]]; then
+              echo "::error::OrangeFox goya needs at least $((out_required_kib / 1024 / 1024)) GiB free for out/ in ${GOYA_OUT_ROOT}; found $((out_available_kib / 1024 / 1024)) GiB."
+              exit 1
+            fi
           fi
 
           memory_kib="$(awk '/^MemTotal:/ { print $2 }' /proc/meminfo)"
@@ -141,7 +216,8 @@ jobs:
             exit 1
           fi
 
-          df -h "$GITHUB_WORKSPACE"
+          df -h "$GOYA_SOURCE_ROOT" "$GOYA_OUT_ROOT"
+          df -i "$GOYA_SOURCE_ROOT" "$GOYA_OUT_ROOT"
           free -h
 
       - name: Restore compiler cache
@@ -204,7 +280,7 @@ jobs:
           (
             while sleep 60; do
               date -u '+%Y-%m-%dT%H:%M:%SZ sync heartbeat'
-              df -h "$GITHUB_WORKSPACE"
+              df -h "$GOYA_SOURCE_ROOT" "$GOYA_OUT_ROOT"
               free -h
             done
           ) &
@@ -279,7 +355,7 @@ jobs:
             "$GITHUB_WORKSPACE/ofox-sync" \
             "$GITHUB_WORKSPACE/pinned-manifest" \
             "$GITHUB_WORKSPACE/ci-gitconfig"
-          df -h "$GITHUB_WORKSPACE"
+          df -h "$GOYA_SOURCE_ROOT" "$GOYA_OUT_ROOT"
           free -h
 
       - name: Check compilation capacity
@@ -287,15 +363,16 @@ jobs:
         run: |
           set -euo pipefail
 
-          available_kib="$(df -Pk "$GITHUB_WORKSPACE" | awk 'NR == 2 { print $4 }')"
+          available_kib="$(df -Pk "$GOYA_OUT_ROOT" | awk 'NR == 2 { print $4 }')"
           required_kib=$((38 * 1024 * 1024))
           if [[ -z "${available_kib}" || "${available_kib}" -lt "${required_kib}" ]]; then
-            echo "::error::OrangeFox goya needs at least 38 GiB free after .repo cleanup; found $((available_kib / 1024 / 1024)) GiB."
+            echo "::error::OrangeFox goya needs at least $((required_kib / 1024 / 1024)) GiB free for out/ in ${GOYA_OUT_ROOT} after .repo cleanup; found $((available_kib / 1024 / 1024)) GiB."
             exit 1
           fi
 
-          du -sh "$ORANGEFOX_TOP"
-          df -h "$GITHUB_WORKSPACE"
+          du -sh "$GOYA_SOURCE_ROOT"
+          df -h "$GOYA_SOURCE_ROOT" "$GOYA_OUT_ROOT"
+          df -i "$GOYA_SOURCE_ROOT" "$GOYA_OUT_ROOT"
 
       - name: Build vendor_boot image
         shell: bash
@@ -324,7 +401,7 @@ jobs:
           (
             while sleep 60; do
               date -u '+%Y-%m-%dT%H:%M:%SZ build heartbeat'
-              df -h "$GITHUB_WORKSPACE"
+              df -h "$GOYA_SOURCE_ROOT" "$GOYA_OUT_ROOT"
               free -h
             done
           ) &
@@ -336,6 +413,14 @@ jobs:
 
           kill "$heartbeat_pid" 2>/dev/null || true
           trap - EXIT
+
+      - name: Save compiler cache
+        if: ${{ success() && steps.ccache_restore.outputs.cache-hit != 'true' }}
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: orangefox-goya-ccache-${{ env.CCACHE_CACHE_VERSION }}-${{ runner.os }}-${{ env.ORANGEFOX_SYNC_REVISION }}-${{ github.sha }}
 
       - name: Report compiler cache
         if: always()
@@ -491,14 +576,6 @@ jobs:
             exit 1
           fi
 
-      - name: Save compiler cache
-        if: ${{ success() && steps.ccache_restore.outputs.cache-hit != 'true' }}
-        continue-on-error: true
-        uses: actions/cache/save@v4
-        with:
-          path: ${{ env.CCACHE_DIR }}
-          key: orangefox-goya-ccache-${{ env.CCACHE_CACHE_VERSION }}-${{ runner.os }}-${{ env.ORANGEFOX_SYNC_REVISION }}-${{ github.sha }}
-
       - name: Collect release artifact
         shell: bash
         env:
@@ -559,6 +636,8 @@ jobs:
         run: |
           set -euo pipefail
           rm -rf "$ORANGEFOX_TOP" \
+            /mnt/goya-orangefox \
+            "$GITHUB_WORKSPACE/goya-out" \
             "$GITHUB_WORKSPACE/ofox-sync" \
             "$GITHUB_WORKSPACE/pinned-manifest" \
             "$GITHUB_WORKSPACE/artifacts"
