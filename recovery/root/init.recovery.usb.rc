@@ -1,0 +1,6 @@
+# The platform recovery init.rc owns configfs and FunctionFS gadget setup.
+# Keep only the MTK UDC peripheral-role setup here to avoid a second gadget
+# configuration racing the platform rules during ADB/fastbootd transitions.
+on property:ro.boot.usbcontroller=*
+    setprop sys.usb.controller ${ro.boot.usbcontroller}
+    write /sys/class/udc/${ro.boot.usbcontroller}/device/../mode peripheral

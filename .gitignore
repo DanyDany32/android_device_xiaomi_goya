@@ -1,0 +1,18 @@
+# Full stock vendor_boot partition dump (112 MiB). Only the extracted
+# prebuilt/vendor-boot/ directory and prebuilt/dtb/ are committed.
+prebuilt/vendor_boot_stock.img
+prebuilt/vendor_boot_stock.img.*
+prebuilt/dump-info.txt
+
+# Local build output and logs
+out/
+*.log
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+
+# Editor / OS noise
+.DS_Store
+Thumbs.db
+*.swp

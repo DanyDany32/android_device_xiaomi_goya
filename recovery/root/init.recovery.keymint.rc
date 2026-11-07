@@ -1,0 +1,74 @@
+# MiTEE + NXP Weaver/Gatekeeper services from the stock firmware. Recovery is
+# permissive, so the stock binaries can run in the recovery domain as long as
+# their device nodes and TA files are present.
+#
+# The blob importer places the stock binaries below /vendor/bin and the
+# MiTEE/NXP libraries below /vendor/lib64, preserving the paths they expect
+# from the running system.
+
+service tee-supplicant /vendor/bin/tee-supplicant
+    class core
+    user system
+    group system secure_element nfc
+    capabilities SYS_RAWIO
+    setenv LD_LIBRARY_PATH /vendor/lib64:/system/lib64
+    seclabel u:r:recovery:s0
+    disabled
+
+service vendor.keymint-mitee /vendor/bin/hw/android.hardware.security.keymint@3.0-service.mitee
+    class early_hal
+    user system
+    group system drmrpc
+    interface aidl android.hardware.security.keymint.IKeyMintDevice/default
+    interface aidl android.hardware.security.secureclock.ISecureClock/default
+    interface aidl android.hardware.security.sharedsecret.ISharedSecret/default
+    setenv LD_LIBRARY_PATH /vendor/lib64:/system/lib64
+    setenv LD_PRELOAD /system/lib64/libgoya_libcxx_compat.so
+    seclabel u:r:recovery:s0
+    disabled
+
+service vendor.gatekeeper_mitee /vendor/bin/hw/android.hardware.gatekeeper-service.mitee
+    class hal
+    user system
+    group system
+    interface aidl android.hardware.gatekeeper.IGatekeeper/default
+    setenv LD_LIBRARY_PATH /vendor/lib64:/system/lib64
+    setenv LD_PRELOAD /system/lib64/libgoya_libcxx_compat.so
+    seclabel u:r:recovery:s0
+    disabled
+
+service vendor.weaver_nxp /vendor/bin/hw/android.hardware.weaver-service.nxp
+    class hal
+    user 2902
+    group system drmrpc
+    capabilities WAKE_ALARM
+    interface aidl android.hardware.weaver.IWeaver/default
+    setenv LD_LIBRARY_PATH /vendor/lib64:/system/lib64
+    setenv LD_PRELOAD /system/lib64/libgoya_libcxx_compat.so
+    seclabel u:r:recovery:s0
+    disabled
+
+on fs
+    mkdir /mnt/vendor/persist 0755 root root
+    mount ext4 /dev/block/by-name/persist /mnt/vendor/persist ro noatime nosuid nodev wait noload
+    mkdir /persist 0755 root root
+    mount none /mnt/vendor/persist /persist bind
+    chmod 0660 /dev/tee0
+    chmod 0660 /dev/teepriv0
+    chmod 0660 /dev/rpmb0
+    chmod 0660 /dev/mmcblk0rpmb
+    chmod 0660 /dev/ufs-bsg0
+    chmod 0666 /dev/kmsg
+    chown system system /dev/tee0
+    chown system system /dev/teepriv0
+    chown system system /dev/rpmb0
+    chown system system /dev/mmcblk0rpmb
+    chown system system /dev/ufs-bsg0
+    setprop vendor.teefs_state ready
+    setprop ro.hardware.gatekeeper mitee
+    start tee-supplicant
+
+on property:init.svc.tee-supplicant=running
+    start vendor.keymint-mitee
+    start vendor.gatekeeper_mitee
+    start vendor.weaver_nxp

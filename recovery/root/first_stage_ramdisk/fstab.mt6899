@@ -1,0 +1,69 @@
+# First-stage fstab for OrangeFox recovery on Xiaomi 15T (goya).
+#
+# The stock platform fragment in vendor_boot already carries a first-stage
+# fstab. This copy is placed in the recovery fragment so the recovery boot has
+# a deterministic list of logical partitions and metadata/userdata entries even
+# if the stock first-stage fstab changes between firmware releases.
+#
+# Format: <src> <mnt_point> <type> <mnt_flags> <fs_mgr_flags>
+# Keep AVB flags out of the recovery path: the recovery image is flashed on an
+# unlocked bootloader and TWRP must be able to mount stock logical partitions
+# without a verified-boot chain. The disable-avb repack variant applies the
+# same rule to the stock platform fragment.
+
+# Dynamic (logical) partitions
+system /system erofs ro wait,slotselect,logical,first_stage_mount
+system /system ext4 noatime,ro wait,slotselect,logical,first_stage_mount
+system_ext /system_ext erofs ro wait,slotselect,logical,first_stage_mount
+system_ext /system_ext ext4 noatime,ro wait,slotselect,logical,first_stage_mount
+product /product erofs ro wait,slotselect,logical,first_stage_mount
+product /product ext4 noatime,ro wait,slotselect,logical,first_stage_mount
+vendor /vendor erofs ro wait,slotselect,logical,first_stage_mount
+vendor /vendor ext4 noatime,ro wait,slotselect,logical,first_stage_mount
+odm /odm erofs ro wait,slotselect,logical,first_stage_mount
+odm /odm ext4 noatime,ro wait,slotselect,logical,first_stage_mount
+system_dlkm /system_dlkm erofs ro wait,slotselect,logical,first_stage_mount
+system_dlkm /system_dlkm ext4 noatime,ro wait,slotselect,logical,first_stage_mount
+vendor_dlkm /vendor_dlkm erofs ro wait,slotselect,logical,first_stage_mount
+vendor_dlkm /vendor_dlkm ext4 noatime,ro wait,slotselect,logical,first_stage_mount
+odm_dlkm /odm_dlkm erofs ro wait,slotselect,logical,first_stage_mount
+odm_dlkm /odm_dlkm ext4 noatime,ro wait,slotselect,logical,first_stage_mount
+
+# Metadata is needed for the metadata-encrypted KeyMint/Weaver keys.
+/dev/block/by-name/metadata /metadata f2fs noatime,nosuid,nodev,sync wait,check,formattable,first_stage_mount
+
+# Userdata stays latemount so recovery can format/unlock it interactively.
+/dev/block/by-name/userdata /data f2fs noatime,nosuid,nodev,discard,fsync_mode=nobarrier,reserve_root=32768,resgid=1065,inlinecrypt,atgc,checkpoint_merge,compress_cache wait,check,formattable,quota,latemount,reservedsize=128m,checkpoint=fs,fileencryption=:aes-256-hctr2:inlinecrypt_optimized,keydirectory=/metadata/vold/metadata_encryption,fsverity,sysfs_path=/sys/devices/platform/soc/112b0000.ufshci,fscompress
+
+# MTK protected / NV partitions
+/dev/block/by-name/protect1 /mnt/vendor/protect_f ext4 noatime,nosuid,nodev,noauto_da_alloc,commit=1,nodelalloc wait,check,formattable
+/dev/block/by-name/protect2 /mnt/vendor/protect_s ext4 noatime,nosuid,nodev,noauto_da_alloc,commit=1,nodelalloc wait,check,formattable
+/dev/block/by-name/nvdata /mnt/vendor/nvdata ext4 noatime,nosuid,nodev,noauto_da_alloc,commit=1,nodelalloc wait,check,formattable
+/dev/block/by-name/md_sec /mnt/vendor/md_sec ext4 noatime,nosuid,nodev,noauto_da_alloc,commit=1,nodelalloc wait,check,formattable
+/dev/block/by-name/nvcfg /mnt/vendor/nvcfg ext4 noatime,nosuid,nodev,noauto_da_alloc,commit=1,nodelalloc wait,check,formattable
+/dev/block/by-name/persist /mnt/vendor/persist ext4 noatime,nosuid,nodev,noauto_da_alloc,commit=1,nodelalloc wait,check,formattable
+
+# Boot / verified boot
+/dev/block/by-name/init_boot /init_boot emmc defaults defaults
+/dev/block/by-name/boot /boot emmc defaults first_stage_mount,nofail,slotselect
+/dev/block/by-name/vendor_boot /vendor_boot emmc defaults defaults
+/dev/block/by-name/dtbo /dtbo emmc defaults defaults
+/dev/block/by-name/vbmeta /vbmeta emmc defaults defaults
+/dev/block/by-name/vbmeta_system /vbmeta_system emmc defaults defaults
+/dev/block/by-name/vbmeta_vendor /vbmeta_vendor emmc defaults defaults
+
+# Raw firmware / identity partitions
+/dev/block/by-name/logo /logo emmc defaults defaults
+/dev/block/by-name/misc /misc emmc defaults defaults
+/dev/block/by-name/nvram /nvram emmc defaults defaults
+/dev/block/by-name/proinfo /proinfo emmc defaults defaults
+/dev/block/by-name/boot_para /boot_para emmc defaults defaults
+/dev/block/by-name/efuse /efuse emmc defaults defaults
+/dev/block/by-name/expdb /expdb emmc defaults defaults
+/dev/block/by-name/frp /persistent emmc defaults defaults
+/dev/block/by-name/otp /otp emmc defaults defaults
+/dev/block/by-name/para /para emmc defaults defaults
+/dev/block/by-name/seccfg /seccfg emmc defaults defaults
+
+# Stock MTK recovery uses rescue as cache. Do not make it mandatory.
+/dev/block/by-name/rescue /cache ext4 noatime,nosuid,nodev,noauto_da_alloc,discard wait,check,formattable,nofail

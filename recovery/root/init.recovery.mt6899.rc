@@ -1,0 +1,112 @@
+import /init.recovery.bootctl.rc
+import /init.recovery.keymint.rc
+
+# Novatek NT38771 touch + Xiaomi touchfeature HAL. The service binary is the
+# stock ODM binary copied to /system/bin by the blob importer, while its
+# libraries and firmware stay below /system/lib64/goya-touch and
+# /system/etc/goya-touch so a later /system mount cannot hide them mid-boot.
+service goya-touch-loader /system/bin/load-touch-modules.sh
+    disabled
+    oneshot
+    user root
+    group root input system
+    seclabel u:r:recovery:s0
+
+service goya-touchfeature /system/bin/vendor.xiaomi.hw.touchfeature-service-recovery
+    disabled
+    user root
+    group root input system
+    setenv LD_LIBRARY_PATH /system/lib64/goya-touch:/odm/lib64:/vendor/lib64:/system/lib64
+    setenv LD_PRELOAD /system/lib64/libgoya_libcxx_compat.so
+    seclabel u:r:recovery:s0
+
+service goya-touch-wait /system/bin/wait-touch-service.sh
+    disabled
+    oneshot
+    user root
+    group root input system
+    seclabel u:r:recovery:s0
+
+service goya-haptics-loader /system/bin/load-haptics-module.sh
+    disabled
+    oneshot
+    user root
+    group root input system
+    seclabel u:r:recovery:s0
+
+on early-init
+    write /sys/fs/selinux/enforce 0
+    setprop vendor.haptics.ready 0
+
+    # /odm is part of the recovery ramdisk. Some ODM binaries hardcode
+    # /vendor/odm and /odm/firmware, so expose one tree through both paths
+    # without duplicating the blobs.
+    mkdir /vendor 0755 root root
+    mkdir /vendor/odm 0755 root root
+    mkdir /vendor/odm/lib64 0755 root root
+    mkdir /vendor/odm/firmware 0755 root root
+    mkdir /vendor/firmware 0755 root root
+
+    # The stock ODM library is built against /odm. Keep both /odm and the
+    # /vendor/odm alias valid inside the recovery ramdisk.
+    mkdir /odm 0755 root root
+    mkdir /odm/lib64 0755 root root
+    mkdir /odm/firmware 0755 root root
+
+    symlink /system/lib64/goya-touch/libtouchreport.so /vendor/odm/lib64/libtouchreport.so
+    symlink /system/lib64/goya-touch/libtouchreport_alg.so /vendor/odm/lib64/libtouchreport_alg.so
+    symlink /system/lib64/goya-touch/libtouchreport_hal.so /vendor/odm/lib64/libtouchreport_hal.so
+    symlink /system/lib64/goya-touch/libtouchreport_sensor.so /vendor/odm/lib64/libtouchreport_sensor.so
+    symlink /system/lib64/goya-touch/libtensorflowlite_touch_c.so /vendor/odm/lib64/libtensorflowlite_touch_c.so
+
+    symlink /system/lib64/goya-touch/libtouchreport.so /odm/lib64/libtouchreport.so
+    symlink /system/lib64/goya-touch/libtouchreport_alg.so /odm/lib64/libtouchreport_alg.so
+    symlink /system/lib64/goya-touch/libtouchreport_hal.so /odm/lib64/libtouchreport_hal.so
+    symlink /system/lib64/goya-touch/libtouchreport_sensor.so /odm/lib64/libtouchreport_sensor.so
+    symlink /system/lib64/goya-touch/libtensorflowlite_touch_c.so /odm/lib64/libtensorflowlite_touch_c.so
+
+    symlink /system/etc/goya-touch/novatek_nt38771_o12a_fw_csot.bin /vendor/odm/firmware/novatek_nt38771_o12a_fw_csot.bin
+    symlink /system/etc/goya-touch/novatek_nt38771_o12a_fw_tm.bin /vendor/odm/firmware/novatek_nt38771_o12a_fw_tm.bin
+    symlink /system/etc/goya-touch/novatek_nt38771_o12a_mp_csot.bin /vendor/odm/firmware/novatek_nt38771_o12a_mp_csot.bin
+    symlink /system/etc/goya-touch/novatek_nt38771_o12a_mp_tm.bin /vendor/odm/firmware/novatek_nt38771_o12a_mp_tm.bin
+    symlink /system/etc/goya-touch/o12a_nova_csot_thp_config.ini /vendor/odm/firmware/o12a_nova_csot_thp_config.ini
+    symlink /system/etc/goya-touch/o12a_nova_tm_thp_config.ini /vendor/odm/firmware/o12a_nova_tm_thp_config.ini
+    symlink /system/etc/goya-touch/smooth.tflite /vendor/odm/firmware/smooth.tflite
+    symlink /system/etc/goya-touch/water_check.tflite /vendor/odm/firmware/water_check.tflite
+
+    symlink /system/etc/goya-touch/novatek_nt38771_o12a_fw_csot.bin /odm/firmware/novatek_nt38771_o12a_fw_csot.bin
+    symlink /system/etc/goya-touch/novatek_nt38771_o12a_fw_tm.bin /odm/firmware/novatek_nt38771_o12a_fw_tm.bin
+    symlink /system/etc/goya-touch/novatek_nt38771_o12a_mp_csot.bin /odm/firmware/novatek_nt38771_o12a_mp_csot.bin
+    symlink /system/etc/goya-touch/novatek_nt38771_o12a_mp_tm.bin /odm/firmware/novatek_nt38771_o12a_mp_tm.bin
+    symlink /system/etc/goya-touch/o12a_nova_csot_thp_config.ini /odm/firmware/o12a_nova_csot_thp_config.ini
+    symlink /system/etc/goya-touch/o12a_nova_tm_thp_config.ini /odm/firmware/o12a_nova_tm_thp_config.ini
+    symlink /system/etc/goya-touch/smooth.tflite /odm/firmware/smooth.tflite
+    symlink /system/etc/goya-touch/water_check.tflite /odm/firmware/water_check.tflite
+
+    mkdir /persist 0755 root root
+
+on init
+    setprop sys.usb.ffs.aio_compat 1
+    setprop sys.usb.configfs 1
+    setprop sys.usb.controller "11201000.usb0"
+
+# Complete touch initialization before the boot trigger starts recovery. The
+# loader is idempotent because first-stage init may already have loaded some
+# of the platform dependencies from the stock platform fragment.
+on early-boot
+    exec_start goya-touch-loader
+    start goya-touchfeature
+    exec_start goya-touch-wait
+
+# Keep the haptic driver out of first-stage initialization. Loading it after
+# the touch stack is ready avoids competing with the panel/touch probe.
+on property:vendor.touch.service.ready=1
+    start goya-haptics-loader
+
+on boot
+    # fastbootd waits for the AIDL BootControl service before opening
+    # /dev/usb-ffs/fastboot. The service uses class early_hal, while the
+    # recovery init flow only class-starts default and hal.
+    start vendor.boot-mtk
+    start vendor.boot-mediatek
+    start health-hal-2-1

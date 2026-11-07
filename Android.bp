@@ -1,0 +1,16 @@
+//
+// OrangeFox recovery support modules for Xiaomi 15T (goya)
+//
+
+cc_library_shared {
+    name: "libgoya_libcxx_compat",
+    srcs: ["libcxx_compat/libcxx_compat.cpp"],
+    compile_multilib: "64",
+    recovery_available: true,
+    stl: "none",
+    shared_libs: ["liblog"],
+    cflags: [
+        "-Wall",
+        "-Werror",
+    ],
+}

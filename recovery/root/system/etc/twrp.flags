@@ -1,0 +1,51 @@
+# TWRP partition flags for Xiaomi 15T (goya).
+#
+# Format: <mnt_point> <type> <device> [device2] <flags>
+# Keep this file in sync with system/etc/recovery.fstab. Goya has no
+# recoverable cache partition in the stock fstab; MTK recovery uses "rescue"
+# for that role, so expose rescue as /cache with nofail semantics.
+
+/metadata           f2fs      /dev/block/by-name/metadata                                  flags=display="metadata";backup=1
+/data               f2fs      /dev/block/by-name/userdata                                  flags=fileencryption=:aes-256-hctr2:inlinecrypt_optimized,keydirectory=/metadata/vold/metadata_encryption
+/cache              ext4      /dev/block/by-name/rescue                                    flags=display="cache";wipeingui;wipeduringfactoryreset
+
+# Boot / verified boot
+/boot               emmc      /dev/block/by-name/boot                                      flags=display="boot";slotselect;backup=1;flashimg=1
+/vendor_boot        emmc      /dev/block/by-name/vendor_boot                               flags=display="vendor_boot";slotselect;backup=1;flashimg=1
+/init_boot          emmc      /dev/block/by-name/init_boot                                 flags=display="init_boot";slotselect;backup=1;flashimg=1
+/dtbo               emmc      /dev/block/by-name/dtbo                                      flags=display="dtbo";slotselect;backup=1;flashimg=1
+/vbmeta             emmc      /dev/block/by-name/vbmeta                                    flags=display="vbmeta";slotselect;backup=1;flashimg=1
+/vbmeta_system      emmc      /dev/block/by-name/vbmeta_system                             flags=display="vbmeta_system";slotselect;backup=1;flashimg=1
+/vbmeta_vendor      emmc      /dev/block/by-name/vbmeta_vendor                             flags=display="vbmeta_vendor";slotselect;backup=1;flashimg=1
+/logo               emmc      /dev/block/by-name/logo                                      flags=display="logo";backup=1
+/misc               emmc      /dev/block/by-name/misc                                      flags=display="misc";backup=1
+
+# Persistent firmware and properties
+/persist            ext4      /dev/block/by-name/persist                                   flags=display="persist";fsflags=ro,noload
+/persist_image      emmc      /dev/block/by-name/persist                                   flags=display="persist";backup=1;flashimg=1
+
+# MTK firmware / factory partitions
+/para               emmc      /dev/block/by-name/para                                      flags=display="para"
+/protect_f          ext4      /dev/block/by-name/protect1                                  flags=display="protect_f"
+/protect_s          ext4      /dev/block/by-name/protect2                                  flags=display="protect_s"
+/nvdata             ext4      /dev/block/by-name/nvdata                                    flags=display="nvdata"
+/nvcfg              ext4      /dev/block/by-name/nvcfg                                     flags=display="nvcfg"
+/md_sec             ext4      /dev/block/by-name/md_sec                                     flags=display="md_sec"
+/boot_para          emmc      /dev/block/by-name/boot_para                                 flags=display="boot_para"
+/otp                emmc      /dev/block/by-name/otp                                       flags=display="otp"
+/persistent         emmc      /dev/block/by-name/frp                                       flags=display="persistent"
+/nvram              emmc      /dev/block/by-name/nvram                                     flags=display="nvram"
+/proinfo            emmc      /dev/block/by-name/proinfo                                   flags=display="proinfo"
+/expdb              emmc      /dev/block/by-name/expdb                                     flags=display="expdb"
+/seccfg             emmc      /dev/block/by-name/seccfg                                    flags=display="seccfg"
+
+# Flashable logical partitions. TWRP resolves the mapper device from the
+# partition name; these entries make the images available for backup/restore.
+/system_image       emmc      /dev/block/mapper/system                                     flags=display="System Image";slotselect;backup;flashimg
+/vendor_image       emmc      /dev/block/mapper/vendor                                     flags=display="Vendor Image";slotselect;backup;flashimg
+/system_ext_image   emmc      /dev/block/mapper/system_ext                                 flags=display="System_EXT Image";slotselect;backup;flashimg
+/product_image      emmc      /dev/block/mapper/product                                    flags=display="Product Image";slotselect;backup;flashimg
+/odm_image          emmc      /dev/block/mapper/odm                                        flags=display="ODM Image";slotselect;backup;flashimg
+/system_dlkm_image  emmc      /dev/block/mapper/system_dlkm                                flags=display="System DLKM Image";slotselect;backup;flashimg
+/vendor_dlkm_image  emmc      /dev/block/mapper/vendor_dlkm                                flags=display="Vendor DLKM Image";slotselect;backup;flashimg
+/odm_dlkm_image     emmc      /dev/block/mapper/odm_dlkm                                   flags=display="ODM DLKM Image";slotselect;backup;flashimg

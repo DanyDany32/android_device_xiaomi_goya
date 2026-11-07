@@ -1,0 +1,8 @@
+# Keep Android shell/Python/Make sources LF even when the tree is edited on
+# Windows. A CRLF shebang or init .rc breaks the build and the recovery boot.
+* text=auto eol=lf
+
+*.dtb binary
+prebuilt/dtb/*.dtb binary
+prebuilt/vendor-boot/vendor_ramdisk* binary
+prebuilt/vendor-boot/dtb binary
