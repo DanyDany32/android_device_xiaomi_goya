@@ -19,8 +19,8 @@ composta da:
 
 | Fase | Contenuto | Stato |
 | --- | --- | --- |
-| Stage 1 | boot, display, touch, ADB, MTP, fastbootd | pronto una volta importato il dump |
-| Stage 2 | decrypt FBE/Metadata con KeyMint/Gatekeeper/Weaver e TouchReport | richiede i blob TEE del firmware |
+| Stage 1 | boot, display, touch, ADB, MTP, fastbootd | input importati dal firmware OS3.0.311.0 |
+| Stage 2 | decrypt FBE/Metadata con KeyMint/Gatekeeper/Weaver e TouchReport | blob TEE e dipendenze importati; decrypt da validare sul dispositivo |
 
 Senza i blob ODM/TEE la build funziona comunque e produce una immagine Stage 1
 senza decrypt. `tools/verify-build-inputs.sh --require-blobs` serve a imporre
