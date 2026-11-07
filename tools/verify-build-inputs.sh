@@ -246,6 +246,10 @@ platforms = [entry for entry in entries if entry.get("type_name") == "platform" 
 if not platforms:
     raise SystemExit("prebuilt vendor_boot has no platform fragment")
 for entry in entries:
+    # The stock recovery fragment is replaced by the OrangeFox build and is
+    # intentionally not committed: only the platform/DLKM inputs are reused.
+    if entry.get("type_name") == "recovery":
+        continue
     fragment = os.path.join(root, entry["file"])
     if not os.path.isfile(fragment):
         raise SystemExit(f"missing prebuilt fragment: {fragment}")
