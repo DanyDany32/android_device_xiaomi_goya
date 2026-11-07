@@ -1,0 +1,13 @@
+ro.product.device=goya
+ro.product.name=goya_eea
+ro.product.model=25069PTEBG
+ro.product.brand=Xiaomi
+ro.board.platform=mt6899
+ro.boot.hardware=mt6899
+ro.boot.slot_suffix=_a
+ro.boot.dynamic_partitions=true
+ro.virtual_ab.enabled=true
+ro.system.build.fingerprint=Xiaomi/missi/missi:16/BP2A.250605.031.A3/16OS3.1.261009.220508313.MTPEGL.S:user/release-keys
+ro.vendor.build.fingerprint=Xiaomi/goya_eea/goya:15/AP3A.240905.015.A2/OS3.0.311.0.WOEEUXM:user/release-keys
+ro.build.version.incremental=OS3.0.311.0.WOEEUXM
+ro.build.version.security_patch=2026-10-01
