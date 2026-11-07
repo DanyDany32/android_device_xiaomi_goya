@@ -265,6 +265,13 @@ if [ "$module_list_status" -eq 0 ]; then
 else
     echo "WARNING: no stock modules.load.recovery could be extracted" >&2
 fi
+
+# The stock recovery fragment is replaced by the OrangeFox one and is not an
+# input to the repacker. Drop it after reading its module list so the
+# committed prebuilt tree only contains inputs that are actually reused.
+if [ -n "${recovery_file:-}" ] && [ -f "${work_dir}/${recovery_file}" ]; then
+    rm -f "${work_dir}/${recovery_file}"
+fi
 magic4="$(od -An -tx1 -N4 "$work_dir/$platform_file" | tr -d ' \n')"
 case "$magic4" in
     02214c18|04224d18|1f8b*|30373037)
