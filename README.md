@@ -44,9 +44,12 @@ la presenza dei blob per una release completa.
 Host Linux (o GitHub Actions Ubuntu 24.04) per la build OrangeFox:
 
 - 16 GB di RAM e almeno 12 GB di swap;
-- almeno 70 GiB liberi dopo la pulizia dell'immagine e la creazione dello swap
-  (i runner pubblici 4-core ne hanno circa 78), e almeno 38 GiB dopo la
-  rimozione di `.repo`;
+- spazio disco: la sync depth-1 arriva a circa 71-74 GiB con `.repo`, quindi
+  il workflow richiede 90 GiB liberi su un runner a disco singolo, oppure
+  70 GiB su un eventuale `/mnt` separato più 38 GiB per `out/`. I runner
+  pubblici 4-core hanno un disco da 150 GB (circa 127 GiB liberi dopo il
+  cleanup); se il runner assegnato è più piccolo il workflow si ferma prima
+  della sync invece di riempire il disco;
 - runner GitHub **pubblico 4-core**: i runner privati 2-core hanno circa 14 GiB
   liberi e non bastano;
 - `git`, `repo`, `python3`, `cpio`, `lz4`, `avbtool`, `mkbootimg`, `java 17`.
@@ -221,8 +224,10 @@ tools/verify-build-inputs.sh
 
 ## 7. Note
 
-- La build OrangeFox completa è pesante e può richiedere diverse ore su un
-  runner pubblico.
+- La build OrangeFox completa richiede in genere 90-150 minuti a freddo su un
+  runner pubblico 4-core; con la ccache calda scende a 20-50 minuti. La ccache
+  viene salvata subito dopo una compilazione riuscita, quindi resta disponibile
+  anche se la validazione finale fallisce.
 - I moduli recovery provengono dal `vendor_dlkm` stock, non dal kernel
   LineageOS: il vermagic deve coincidere con il kernel del firmware.
 - La regione del firmware (EEA/Global/CN) deve essere la stessa del telefono.
