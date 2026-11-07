@@ -226,8 +226,9 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: orangefox-goya-ccache-${{ env.CCACHE_CACHE_VERSION }}-${{ runner.os }}-${{ env.ORANGEFOX_SYNC_REVISION }}-${{ github.sha }}
+          key: orangefox-goya-ccache-${{ env.CCACHE_CACHE_VERSION }}-${{ runner.os }}-${{ env.ORANGEFOX_SYNC_REVISION }}-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
+            orangefox-goya-ccache-${{ env.CCACHE_CACHE_VERSION }}-${{ runner.os }}-${{ env.ORANGEFOX_SYNC_REVISION }}-${{ github.sha }}-
             orangefox-goya-ccache-${{ env.CCACHE_CACHE_VERSION }}-${{ runner.os }}-${{ env.ORANGEFOX_SYNC_REVISION }}-
 
       - name: Configure compiler cache
@@ -375,6 +376,7 @@ jobs:
           df -i "$GOYA_SOURCE_ROOT" "$GOYA_OUT_ROOT"
 
       - name: Build vendor_boot image
+        id: build
         shell: bash
         working-directory: ${{ env.ORANGEFOX_TOP }}
         env:
@@ -414,21 +416,40 @@ jobs:
           kill "$heartbeat_pid" 2>/dev/null || true
           trap - EXIT
 
+      - name: Check compiler cache
+        id: ccache_state
+        if: ${{ always() && steps.build.outcome != 'skipped' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          size_kib=0
+          if [ -d "$CCACHE_DIR" ]; then
+            size_kib="$(du -sk "$CCACHE_DIR" | awk '{print $1}')"
+          fi
+          if [ "$size_kib" -ge $((100 * 1024)) ]; then
+            echo "worth_saving=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "worth_saving=false" >> "$GITHUB_OUTPUT"
+          fi
+          echo "ccache size: $((size_kib / 1024)) MiB"
+
       - name: Save compiler cache
-        if: ${{ success() && steps.ccache_restore.outputs.cache-hit != 'true' }}
+        if: ${{ always() && steps.ccache_state.outputs.worth_saving == 'true' }}
         continue-on-error: true
         uses: actions/cache/save@v4
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: orangefox-goya-ccache-${{ env.CCACHE_CACHE_VERSION }}-${{ runner.os }}-${{ env.ORANGEFOX_SYNC_REVISION }}-${{ github.sha }}
+          key: orangefox-goya-ccache-${{ env.CCACHE_CACHE_VERSION }}-${{ runner.os }}-${{ env.ORANGEFOX_SYNC_REVISION }}-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Report compiler cache
         if: always()
         shell: bash
         run: |
           set -euo pipefail
-          ccache -s
-          du -sh "$CCACHE_DIR"
+          ccache -s || true
+          if [ -d "$CCACHE_DIR" ]; then
+            du -sh "$CCACHE_DIR"
+          fi
 
       - name: Validate release image
         shell: bash
