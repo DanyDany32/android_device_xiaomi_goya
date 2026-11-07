@@ -6,8 +6,10 @@
 DEVICE_PATH := device/xiaomi/goya
 
 # Architecture
+# Android 14 ships armv8-a.mk, armv8-2a.mk and armv9-a.mk only: there is no
+# armv9-2a toolchain file, so use armv9-a. The MT6899 (ARMv9.2) implements it.
 TARGET_ARCH := arm64
-TARGET_ARCH_VARIANT := armv9-2a
+TARGET_ARCH_VARIANT := armv9-a
 TARGET_CPU_ABI := arm64-v8a
 TARGET_CPU_VARIANT := generic
 TARGET_CPU_VARIANT_RUNTIME := cortex-a55
