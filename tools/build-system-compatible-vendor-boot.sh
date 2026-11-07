@@ -254,9 +254,11 @@ if [ -d "$platform_root/system/etc/vintf/manifest" ]; then
 fi
 
 # The stock BootControl service is AIDL on goya. The module name differs
-# between MTK firmware branches; accept both spellings. The recovery rc file
-# is replaced by device_xiaomi_goya/recovery/root/init.recovery.bootctl.rc so
-# the libc++ compatibility shim is preloaded.
+# between MTK firmware branches; recovery/root/init.recovery.bootctl.rc
+# declares a single vendor.boot-mtk service for the mtk_recovery path and
+# preloads the libc++ compatibility shim. When the fragment only carries the
+# mediatek_recovery spelling, add a symlink so the rc keeps working without
+# declaring the same AIDL interface twice (host_init_verifier rejects that).
 boot_control_found=0
 for service in \
     "$platform_root/system/bin/hw/android.hardware.boot-service.mtk_recovery" \
@@ -269,6 +271,10 @@ done
 if [ "$boot_control_found" -eq 0 ]; then
     echo "warning: stock platform fragment has no known AIDL BootControl binary" >&2
     echo "warning: fastbootd slot switching may be unavailable in this build" >&2
+elif [ ! -f "$platform_root/system/bin/hw/android.hardware.boot-service.mtk_recovery" ]; then
+    ln -sf android.hardware.boot-service.mediatek_recovery \
+        "$platform_root/system/bin/hw/android.hardware.boot-service.mtk_recovery"
+    echo "linked mediatek_recovery as mtk_recovery for the recovery init script"
 fi
 if ! grep -rqF '<fqname>IBootControl/default</fqname>' \
         "$platform_root/vendor/etc/vintf/manifest" 2>/dev/null; then
@@ -299,8 +305,8 @@ rm -f \
     "$platform_root/vendor/etc/vintf/manifest/android.hardware.health-service.example.xml" \
     "$platform_root/system/lib64/librecovery_ui.so"
 
-# Drop the stock BootControl rc files; init.recovery.bootctl.rc starts both
-# possible service names and exports the compatibility preload.
+# Drop the stock BootControl rc files; init.recovery.bootctl.rc from the
+# recovery fragment starts the service with the compatibility preload.
 find "$platform_root/system/etc/init" -maxdepth 1 -type f \
     -name '*boot-service*recovery*.rc' -delete 2>/dev/null || true
 

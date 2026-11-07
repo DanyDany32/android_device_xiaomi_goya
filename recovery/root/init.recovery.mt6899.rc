@@ -108,5 +108,4 @@ on boot
     # /dev/usb-ffs/fastboot. The service uses class early_hal, while the
     # recovery init flow only class-starts default and hal.
     start vendor.boot-mtk
-    start vendor.boot-mediatek
     start health-hal-2-1

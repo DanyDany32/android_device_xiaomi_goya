@@ -191,9 +191,11 @@ check_absent "${DEVICE_DIR}/vendorsetup.sh" "OF_FORCE_PREBUILT_KERNEL=1" "no pre
 
 # Recovery init / fstab
 check_contains "${DEVICE_DIR}/recovery/root/init.recovery.bootctl.rc" "android.hardware.boot-service.mtk_recovery" "mtk BootControl service is missing"
-check_contains "${DEVICE_DIR}/recovery/root/init.recovery.bootctl.rc" "android.hardware.boot-service.mediatek_recovery" "mediatek BootControl fallback is missing"
+check_absent "${DEVICE_DIR}/recovery/root/init.recovery.bootctl.rc" "android.hardware.boot-service.mediatek_recovery" "a second BootControl service would redefine the AIDL interface"
 check_contains "${DEVICE_DIR}/recovery/root/init.recovery.bootctl.rc" "libgoya_libcxx_compat.so" "BootControl shim preload is missing"
 check_contains "${DEVICE_DIR}/recovery/root/init.recovery.mt6899.rc" "import /init.recovery.bootctl.rc" "BootControl rc is not imported"
+check_contains "${DEVICE_DIR}/recovery/root/init.recovery.mt6899.rc" "start vendor.boot-mtk" "BootControl service is not started"
+check_absent "${DEVICE_DIR}/recovery/root/init.recovery.mt6899.rc" "start vendor.boot-mediatek" "only the vendor.boot-mtk service exists"
 check_contains "${DEVICE_DIR}/recovery/root/init.recovery.mt6899.rc" "import /init.recovery.keymint.rc" "KeyMint rc is not imported"
 check_contains "${DEVICE_DIR}/recovery/root/init.recovery.mt6899.rc" "vendor.xiaomi.hw.touchfeature-service-recovery" "touchfeature service is missing"
 check_contains "${DEVICE_DIR}/recovery/root/init.recovery.keymint.rc" "android.hardware.security.keymint@3.0-service.mitee" "KeyMint service is missing"

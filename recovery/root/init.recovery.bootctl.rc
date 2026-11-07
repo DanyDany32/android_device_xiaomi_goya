@@ -1,17 +1,14 @@
-# Keep the stock MediaTek AIDL BootControl implementation from the platform
-# ramdisk fragment. Goya's stock image can ship either the mtk_recovery or the
-# mediatek_recovery module name; start both definitions and let the one that
-# exists register android.hardware.boot.IBootControl/default.
+# Start the stock MediaTek AIDL BootControl implementation from the platform
+# ramdisk fragment, preloading the libc++ compatibility shim (the stock
+# Android 16 binary references std::__libcpp_verbose_abort, which OrangeFox
+# 14.1's libc++ does not export).
+#
+# Only one service may declare IBootControl/default: host_init_verifier fails
+# the build if the same AIDL interface is registered twice. Goya firmware
+# ships android.hardware.boot-service.mtk_recovery; when a firmware branch
+# only provides the mediatek_recovery spelling, the vendor_boot repacker adds
+# a symlink with the name used here.
 service vendor.boot-mtk /system/bin/hw/android.hardware.boot-service.mtk_recovery
-    class early_hal
-    user root
-    group root
-    setenv LD_LIBRARY_PATH /system/lib64:/vendor/lib64
-    setenv LD_PRELOAD /system/lib64/libgoya_libcxx_compat.so
-    seclabel u:r:recovery:s0
-    interface aidl android.hardware.boot.IBootControl/default
-
-service vendor.boot-mediatek /system/bin/hw/android.hardware.boot-service.mediatek_recovery
     class early_hal
     user root
     group root
