@@ -71,6 +71,18 @@ search_tree() {
     grep -RqsF -- "$marker" "$directory"
 }
 
+# Missing Stage 2 files are fatal for a release build and warnings otherwise.
+require_stage2_file() {
+    if [ -f "$1" ]; then
+        return 0
+    fi
+    if [ "$REQUIRE_BLOBS" -eq 1 ]; then
+        fail "$2"
+    else
+        warn "$2"
+    fi
+}
+
 for command_name in awk cpio find grep od python3 sed sha256sum sort stat strings tar; do
     command -v "$command_name" >/dev/null 2>&1 || \
         fail "required host command not found: ${command_name}"
@@ -327,6 +339,18 @@ if [ -f "$touch_service" ]; then
     if [ ! -f "${DEVICE_DIR}/proprietary/odm/etc/vintf/manifest/vendor.xiaomi.hw.touchfeature-service.xml" ]; then
         warn "touchfeature VINTF manifest is missing; the HAL may not be visible to clients"
     fi
+    for library in \
+        vendor.xiaomi.hw.touchfeature-V1-ndk.so \
+        android.frameworks.sensorservice-V1-ndk.so \
+        android.hardware.sensors-V2-ndk.so \
+        libui.so \
+        libmisight.so; do
+        require_stage2_file "${DEVICE_DIR}/proprietary/vendor/lib64/${library}" \
+            "touch HAL runtime library is missing: ${library}"
+    done
+    require_stage2_file \
+        "${DEVICE_DIR}/proprietary/odm/lib64/vendor.xiaomi.hardware.framecapturemanager-V1-ndk.so" \
+        "touch HAL ODM runtime library is missing: vendor.xiaomi.hardware.framecapturemanager-V1-ndk.so"
 else
     warn "touchfeature HAL is absent; build will produce a Stage 1 image without touch"
 fi
@@ -339,17 +363,6 @@ vendor_manifest_dir="${DEVICE_DIR}/proprietary/vendor/etc/vintf/manifest"
 # Missing VINTF fragments are fatal for a Stage 2 release: without them
 # servicemanager never exposes the HAL to Keystore2 even when the binary and
 # the TA files are in the ramdisk.
-require_stage2_file() {
-    if [ -f "$1" ]; then
-        return 0
-    fi
-    if [ "$REQUIRE_BLOBS" -eq 1 ]; then
-        fail "$2"
-    else
-        warn "$2"
-    fi
-}
-
 if [ -f "$keymint_service" ]; then
     check_file "${DEVICE_DIR}/proprietary/vendor/bin/tee-supplicant"
     if ! compgen -G "${DEVICE_DIR}/proprietary/vendor/lib64/libkeymint*.so" >/dev/null; then
@@ -359,17 +372,52 @@ if [ -f "$keymint_service" ]; then
     if ! compgen -G "${DEVICE_DIR}/proprietary/vendor/mitee/ta/*.ta" >/dev/null; then
         fail "KeyMint is present but vendor/mitee/ta is empty"
     fi
+    keymint_manifest="${vendor_manifest_dir}/android.hardware.security.keymint-service.mitee.xml"
+    require_stage2_file "$keymint_manifest" \
+        "KeyMint VINTF manifest is missing: android.hardware.security.keymint-service.mitee.xml"
+    if [ -f "$keymint_manifest" ]; then
+        check_contains "$keymint_manifest" "IKeyMintDevice/default" \
+            "KeyMint manifest does not declare IKeyMintDevice/default"
+        check_contains "$keymint_manifest" "IRemotelyProvisionedComponent/default" \
+            "KeyMint manifest does not declare IRemotelyProvisionedComponent/default"
+    fi
+    # The MiTEE service binary also implements ISecureClock and ISharedSecret.
+    # The stock firmware declares them in separate VINTF fragments, so require
+    # those too: without them Keystore2 cannot see the interfaces even though
+    # the code is present in the same process.
     for manifest in \
-        android.hardware.security.keymint-service.mitee.xml \
         android.hardware.security.secureclock-service.mitee.xml \
         android.hardware.security.sharedsecret-service.mitee.xml; do
         require_stage2_file "${vendor_manifest_dir}/${manifest}" \
             "KeyMint VINTF manifest is missing: ${manifest}"
     done
+    # Runtime dependency closure of the KeyMint service. These SONAMEs are
+    # direct DT_NEEDED entries of the stock binary, so they must be imported
+    # even though their names do not mention keymint.
+    for library in \
+        android.hardware.security.keymint-V3-ndk.so \
+        android.hardware.security.secureclock-V1-ndk.so \
+        android.hardware.security.sharedsecret-V1-ndk.so \
+        android.hardware.security.rkp-V3-ndk.so \
+        libkeymaster_messages.so \
+        libkeymaster_portable.so \
+        libpuresoftkeymasterdevice.so \
+        libcppcose_rkp.so \
+        libtrusty.so \
+        libjsoncpp.so; do
+        require_stage2_file "${DEVICE_DIR}/proprietary/vendor/lib64/${library}" \
+            "KeyMint runtime library is missing: ${library}"
+    done
     if [ -f "$gatekeeper_service" ]; then
         require_stage2_file \
             "${vendor_manifest_dir}/android.hardware.gatekeeper-service.mitee.xml" \
             "Gatekeeper VINTF manifest is missing"
+        for library in \
+            android.hardware.gatekeeper-V1-ndk.so \
+            libgatekeeper.so; do
+            require_stage2_file "${DEVICE_DIR}/proprietary/vendor/lib64/${library}" \
+                "Gatekeeper runtime library is missing: ${library}"
+        done
     else
         warn "Gatekeeper MiTEE is absent; metadata decryption may fail"
     fi
@@ -377,6 +425,15 @@ if [ -f "$keymint_service" ]; then
         require_stage2_file \
             "${vendor_manifest_dir}/android.hardware.weaver-service.nxp.xml" \
             "Weaver VINTF manifest is missing"
+        for library in \
+            android.hardware.weaver-V2-ndk.so \
+            android.hardware.secure_element-V1-ndk.so \
+            android.se.omapi-V1-ndk.so \
+            android.system.suspend-V1-ndk.so \
+            ese_weaver.nxp.so; do
+            require_stage2_file "${DEVICE_DIR}/proprietary/vendor/lib64/${library}" \
+                "Weaver runtime library is missing: ${library}"
+        done
     else
         warn "NXP Weaver is absent; Gatekeeper-only key derivation will be used"
     fi

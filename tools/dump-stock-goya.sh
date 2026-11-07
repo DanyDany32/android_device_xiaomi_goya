@@ -170,17 +170,50 @@ copy_optional /vendor/etc/vintf/manifest/android.hardware.weaver-service.nxp.xml
 copy_optional /odm/etc/vintf/manifest/vendor.xiaomi.hw.touchfeature-service.xml
 copy_glob_optional '/vendor/mitee/ta/*.ta'
 copy_glob_optional '/odm/mitee/ta/*.ta'
-# The KeyMint HAL links different versioned libraries across firmware
-# releases (libkeymint.so, libkeymint_V3.so, remote provisioning helpers).
-# Dump every KeyMint library and let the importer keep the exact SONAMEs.
-copy_glob_optional '/vendor/lib64/*keymint*.so'
-copy_optional /vendor/lib64/libteecli.so
-copy_glob_optional '/vendor/lib64/libteec*.so'
-copy_glob_optional '/vendor/lib64/libTEE*.so'
-copy_glob_optional '/vendor/lib64/libsoft_attestation*.so'
-copy_glob_optional '/vendor/lib64/libcppbor*.so'
-copy_glob_optional '/vendor/lib64/*mitee*.so'
-copy_glob_optional '/odm/lib64/*mitee*.so'
+# Dependency closure of the stock KeyMint, Gatekeeper, Weaver, tee-supplicant
+# and touchfeature binaries. The HALs link against vendor NDK stubs and
+# support libraries whose names do not contain "keymint" or "tee"; importing
+# only the obvious files leaves them unable to start (missing SONAME).
+for pattern in \
+    '/vendor/lib64/android.frameworks.sensorservice-*.so' \
+    '/vendor/lib64/android.hardware.common-*.so' \
+    '/vendor/lib64/android.hardware.common.fmq-*.so' \
+    '/vendor/lib64/android.hardware.gatekeeper-*.so' \
+    '/vendor/lib64/android.hardware.graphics.*.so' \
+    '/vendor/lib64/android.hardware.secure_element-*.so' \
+    '/vendor/lib64/android.hardware.security.*.so' \
+    '/vendor/lib64/android.hardware.sensors-*.so' \
+    '/vendor/lib64/android.hardware.weaver-*.so' \
+    '/vendor/lib64/android.se.omapi-*.so' \
+    '/vendor/lib64/android.system.suspend-*.so' \
+    '/vendor/lib64/ese_weaver*.so' \
+    '/vendor/lib64/lib_android_keymaster*.so' \
+    '/vendor/lib64/libbase.so' \
+    '/vendor/lib64/libcppbor*.so' \
+    '/vendor/lib64/libcppcose*.so' \
+    '/vendor/lib64/libcrypto.so' \
+    '/vendor/lib64/libcutils.so' \
+    '/vendor/lib64/libgatekeeper*.so' \
+    '/vendor/lib64/libgralloctypes.so' \
+    '/vendor/lib64/libhardware.so' \
+    '/vendor/lib64/libhardware_legacy.so' \
+    '/vendor/lib64/libhidlbase.so' \
+    '/vendor/lib64/libjsoncpp.so' \
+    '/vendor/lib64/libkeymaster*.so' \
+    '/vendor/lib64/libkeymint*.so' \
+    '/vendor/lib64/libmisight.so' \
+    '/vendor/lib64/libpuresoftkeymasterdevice.so' \
+    '/vendor/lib64/libsoft_attestation*.so' \
+    '/vendor/lib64/libteecli.so' \
+    '/vendor/lib64/libtrusty.so' \
+    '/vendor/lib64/libui.so' \
+    '/vendor/lib64/libutils.so' \
+    '/vendor/lib64/vendor.xiaomi.hw.touchfeature-*.so' \
+    '/odm/lib64/vendor.xiaomi.hardware.framecapturemanager-*.so' \
+    '/vendor/lib64/*mitee*.so' \
+    '/odm/lib64/*mitee*.so'; do
+    copy_glob_optional "$pattern"
+done
 
 # AW8697 haptic firmware consumed by si_haptic.ko.
 copy_glob_optional '/vendor/firmware/aw8697_*.bin'

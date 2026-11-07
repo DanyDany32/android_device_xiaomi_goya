@@ -12,6 +12,10 @@ out/
 *.tgz
 *.zip
 
+# Python bytecode
+__pycache__/
+*.pyc
+
 # Editor / OS noise
 .DS_Store
 Thumbs.db

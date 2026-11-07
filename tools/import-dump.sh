@@ -256,20 +256,59 @@ for manifest in \
         "${DEVICE_DIR}/proprietary/vendor/etc/vintf/manifest/$manifest" 0644
 done
 
-# KeyMint, TEE client and their direct MiTEE dependencies. Keep the original
-# SONAMEs: the stock binaries were built against these exact filenames.
+# KeyMint, TEE, Gatekeeper, Weaver and touchfeature dependency closure. Keep
+# the original SONAMEs: the stock binaries were built against these exact
+# filenames. Importing only the obvious *keymint*/*tee* names is not enough:
+# the HALs also need the vendor NDK stubs, libkeymaster*, libcppcose*, the NXP
+# Weaver stack and the touch NDK/support libraries, otherwise they fail with
+# "library not found" when init starts them.
+#
+# Platform libraries (libc, libm, libdl, libc++, libbinder_ndk, liblog,
+# libsync, libvndksupport) stay out of the list: recovery provides its own.
+vendor_library_patterns=(
+    'android.frameworks.sensorservice-*.so'
+    'android.hardware.common-*.so'
+    'android.hardware.common.fmq-*.so'
+    'android.hardware.gatekeeper-*.so'
+    'android.hardware.graphics.*.so'
+    'android.hardware.secure_element-*.so'
+    'android.hardware.security.*.so'
+    'android.hardware.sensors-*.so'
+    'android.hardware.weaver-*.so'
+    'android.se.omapi-*.so'
+    'android.system.suspend-*.so'
+    'ese_weaver*.so'
+    'lib_android_keymaster*.so'
+    'libbase.so'
+    'libcppbor*.so'
+    'libcppcose*.so'
+    'libcrypto.so'
+    'libcutils.so'
+    'libgatekeeper*.so'
+    'libgralloctypes.so'
+    'libhardware.so'
+    'libhardware_legacy.so'
+    'libhidlbase.so'
+    'libjsoncpp.so'
+    'libkeymaster*.so'
+    'libkeymint*.so'
+    'libmisight.so'
+    'libpuresoftkeymasterdevice.so'
+    'libsoft_attestation*.so'
+    'libteecli.so'
+    'libtrusty.so'
+    'libui.so'
+    'libutils.so'
+    'vendor.xiaomi.hw.touchfeature-*.so'
+)
 if [ -d "$vendor_src/lib64" ]; then
-    for library in "$vendor_src/lib64/"*.so; do
-        [ -f "$library" ] || continue
-        name="$(basename -- "$library")"
-        case "$name" in
-            *keymint*|*tee*|*TEE*|libcppbor*|libsoft_attestation*)
-                copy_optional "$library" \
-                    "${DEVICE_DIR}/proprietary/vendor/lib64/$name" 0644
-                ;;
-        esac
+    for pattern in "${vendor_library_patterns[@]}"; do
+        copy_glob_optional "$vendor_src/lib64/$pattern" \
+            "${DEVICE_DIR}/proprietary/vendor/lib64" 0644
     done
 fi
+copy_glob_optional "$touch_src/lib64/vendor.xiaomi.hardware.framecapturemanager-*.so" \
+    "${DEVICE_DIR}/proprietary/odm/lib64" 0644
 
 copy_glob_optional "$vendor_src/mitee/ta/*.ta" \
     "${DEVICE_DIR}/proprietary/vendor/mitee/ta" 0644

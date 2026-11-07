@@ -31,9 +31,9 @@ Extracts:
   prebuilt/vendor-boot/vendor_ramdisk00   Type-1 platform fragment (stock)
   prebuilt/vendor-boot/vendor_ramdisk01+  Any extra stock fragments
   prebuilt/vendor-boot/modules.load.recovery
-                                          First-stage recovery module list
-                                          copied from the stock recovery
-                                          fragment (when present)
+                                          First-stage recovery module list,
+                                          read from the platform fragment
+                                          (fallback: recovery fragment)
   prebuilt/vendor-boot/dtb                Stock DTB
   prebuilt/vendor-boot/bootconfig         Stock bootconfig (may be empty)
   prebuilt/vendor-boot/header.json        Vendor_boot v4 ramdisk table
@@ -161,11 +161,12 @@ for entry in entries:
     print(f"  {entry['file']}: type={entry['type_name']} name={entry['name']!r} size={entry['size']}")
 PY
 
-# The repacker replaces the stock recovery fragment, but its
-# lib/modules/modules.load.recovery is still valuable: it is the exact
-# first-stage list used by stock recovery and includes the MTK IPI/RPMSG
-# mailbox modules that the normal-boot modules.load omits. Keep a copy so
-# fox_callback.sh can install it in the OrangeFox recovery fragment.
+# The stock recovery fragment on goya contains no kernel modules: the exact
+# first-stage list (lib/modules/modules.load.recovery) lives in the platform
+# fragment, i.e. vendor_ramdisk00. It includes the MTK IPI/RPMSG mailbox
+# modules that the normal-boot modules.load omits. Keep a copy so
+# fox_callback.sh can install it in the OrangeFox recovery fragment. Some
+# other layouts put the list in the recovery fragment, so that is the fallback.
 decompress_fragment() {
     local input="$1" output="$2" magic
 
@@ -187,55 +188,83 @@ decompress_fragment() {
     esac
 }
 
-recovery_file="$("$PYTHON" - "$work_dir/header.json" <<'PY'
+read_fragment_name() {
+    "$PYTHON" - "$work_dir/header.json" "$1" <<'PY'
 import json
 import sys
-with open(sys.argv[1], encoding="utf-8") as handle:
+
+path, kind = sys.argv[1], sys.argv[2]
+with open(path, encoding="utf-8") as handle:
     info = json.load(handle)
 entry = next(
     (item for item in info.get("ramdisk_table", [])
-     if item.get("type_name") == "recovery" and item.get("size", 0) > 0),
+     if item.get("type_name") == kind and item.get("size", 0) > 0),
     None,
 )
-if entry is None:
-    raise SystemExit(1)
-print(entry["file"])
+if entry is not None:
+    print(entry["file"])
 PY
-)" || true
+}
 
-if [ -n "${recovery_file:-}" ] && [ -f "${work_dir}/${recovery_file}" ]; then
-    stock_recovery_cpio="${work_dir}/stock-recovery.cpio"
-    if decompress_fragment "${work_dir}/${recovery_file}" "$stock_recovery_cpio"; then
-        recovery_load_path="$(cpio -it --quiet < "$stock_recovery_cpio" | \
-            grep -E '^(\./)?lib/modules/modules\.load\.recovery$' | head -n 1 || true)"
-        if [ -n "$recovery_load_path" ]; then
-            cpio -i --quiet --to-stdout "$recovery_load_path" \
-                < "$stock_recovery_cpio" > "${work_dir}/modules.load.recovery"
-            echo "Stock recovery module list: $(wc -l < "${work_dir}/modules.load.recovery" | tr -d ' ') entries"
-        else
-            echo "WARNING: stock recovery fragment has no lib/modules/modules.load.recovery" >&2
-        fi
+platform_file="$(read_fragment_name platform || true)"
+recovery_file="$(read_fragment_name recovery || true)"
+
+# Extract lib/modules/modules.load.recovery from one fragment. Returns
+# 0 on success, 2 when the archive has no such entry and 1 when the
+# fragment cannot be decompressed.
+extract_module_list() {
+    local fragment="$1" cpio_file="$2" entry
+
+    [ -n "$fragment" ] && [ -f "${work_dir}/${fragment}" ] || return 1
+    decompress_fragment "${work_dir}/${fragment}" "$cpio_file" || return 1
+    entry="$(cpio -it --quiet < "$cpio_file" | \
+        grep -E '^(\./)?lib/modules/modules\.load\.recovery$' | head -n 1 || true)"
+    [ -n "$entry" ] || return 2
+    rm -f "${work_dir}/modules.load.recovery"
+    cpio -i --quiet --to-stdout "$entry" < "$cpio_file" \
+        > "${work_dir}/modules.load.recovery" || return 1
+    return 0
+}
+
+module_list_source=""
+module_list_status=1
+if [ -n "${platform_file:-}" ]; then
+    platform_cpio="${work_dir}/stock-platform.cpio"
+    if extract_module_list "$platform_file" "$platform_cpio"; then
+        module_list_source="platform fragment"
+        module_list_status=0
     else
-        echo "WARNING: cannot decompress the stock recovery fragment; install lz4 to preserve its module list" >&2
+        module_list_status=$?
+        if [ "$module_list_status" -eq 2 ]; then
+            echo "WARNING: platform fragment has no lib/modules/modules.load.recovery" >&2
+        else
+            echo "WARNING: cannot decompress the platform fragment; install lz4 to preserve its module list" >&2
+        fi
     fi
-    # The decompressed archive is a temporary artifact; only the extracted
-    # module list is committed.
-    rm -f "${stock_recovery_cpio:-}"
-else
-    echo "WARNING: stock vendor_boot has no non-empty recovery fragment" >&2
+    rm -f "$platform_cpio"
 fi
 
-platform_file="$("$PYTHON" - "$work_dir/header.json" <<'PY'
-import json
-import sys
-with open(sys.argv[1], encoding="utf-8") as handle:
-    info = json.load(handle)
-entry = next((item for item in info["ramdisk_table"] if item["type_name"] == "platform" and item["size"] > 0), None)
-if entry is None:
-    raise SystemExit(1)
-print(entry["file"])
-PY
-)"
+if [ "$module_list_status" -ne 0 ] && [ -n "${recovery_file:-}" ]; then
+    recovery_cpio="${work_dir}/stock-recovery.cpio"
+    if extract_module_list "$recovery_file" "$recovery_cpio"; then
+        module_list_source="recovery fragment"
+        module_list_status=0
+    else
+        module_list_status=$?
+        if [ "$module_list_status" -eq 2 ]; then
+            echo "WARNING: stock recovery fragment has no lib/modules/modules.load.recovery" >&2
+        else
+            echo "WARNING: cannot decompress the stock recovery fragment; install lz4 to preserve its module list" >&2
+        fi
+    fi
+    rm -f "$recovery_cpio"
+fi
+
+if [ "$module_list_status" -eq 0 ]; then
+    echo "Stock recovery module list: $(wc -l < "${work_dir}/modules.load.recovery" | tr -d ' ') entries (from ${module_list_source})"
+else
+    echo "WARNING: no stock modules.load.recovery could be extracted" >&2
+fi
 magic4="$(od -An -tx1 -N4 "$work_dir/$platform_file" | tr -d ' \n')"
 case "$magic4" in
     02214c18|04224d18|1f8b*|30373037)

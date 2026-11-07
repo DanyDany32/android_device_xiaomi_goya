@@ -10,7 +10,7 @@ release. Do not mix files from different builds.
 | `vendor-boot/header.json` | `vendor_boot.img` header | v4 ramdisk table, addresses and sizes |
 | `vendor-boot/vendor_ramdisk00` | type-1 platform fragment | stock normal-boot userspace, fstab, firmware and vendor_ramdisk modules |
 | `vendor-boot/vendor_ramdisk01+` | any extra stock fragment | non-recovery fragments are passed through unchanged by the repacker |
-| `vendor-boot/modules.load.recovery` | stock recovery fragment | first-stage recovery module list reused by `fox_callback.sh`; includes the MTK IPI/RPMSG mailbox modules missing from the normal `modules.load` |
+| `vendor-boot/modules.load.recovery` | stock platform fragment (`vendor_ramdisk00`) | first-stage recovery module list reused by `fox_callback.sh`; includes the MTK IPI/RPMSG mailbox modules missing from the normal `modules.load`. The recovery fragment is used only as a fallback for layouts that keep the list there. |
 | `vendor-boot/dtb` | DTB from `vendor_boot.img` | MediaTek-wrapped FDT, kept byte-identical |
 | `vendor-boot/bootconfig` | vendor bootconfig | may be empty |
 | `dtb/mt6899-goya.dtb` | copy of `vendor-boot/dtb` | consumed by the build and repacker |
