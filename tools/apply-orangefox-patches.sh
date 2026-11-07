@@ -96,8 +96,10 @@ if grep -RqsF -- 'COMPRESSION_COMMANDR' "$BUILD_DIR"; then
     exit 1
 fi
 
-if ! grep -RqsF -- 'OF_USE_AIDL_BOOT_CONTROL' "${TOP_DIR}/vendor/twrp"; then
-    echo "ERROR: OrangeFox vendor/twrp does not expose OF_USE_AIDL_BOOT_CONTROL" >&2
+# OF_USE_AIDL_BOOT_CONTROL is consumed by bootable/recovery (orangefox.mk and
+# partitionmanager.cpp); vendor/twrp does not reference it.
+if ! grep -RqsF -- 'OF_USE_AIDL_BOOT_CONTROL' "${TOP_DIR}/bootable/recovery"; then
+    echo "ERROR: OrangeFox bootable/recovery does not expose OF_USE_AIDL_BOOT_CONTROL" >&2
     exit 1
 fi
 if [ ! -f "${TOP_DIR}/bootable/recovery/gui/theme/common/languages/it_IT.xml" ]; then

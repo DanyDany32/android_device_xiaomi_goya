@@ -493,8 +493,11 @@ if [ -n "$TOP_DIR" ]; then
     if ! search_tree "Fox_Before_Recovery_Image" "${TOP_DIR}/build/make"; then
         fail "OrangeFox build/make patch is not applied (missing Fox_Before_Recovery_Image)"
     fi
-    if ! search_tree "OF_USE_AIDL_BOOT_CONTROL" "${TOP_DIR}/vendor/twrp"; then
-        fail "OrangeFox vendor/twrp does not support OF_USE_AIDL_BOOT_CONTROL"
+    # OF_USE_AIDL_BOOT_CONTROL is a bootable/recovery build variable
+    # (orangefox.mk -> -DOF_USE_AIDL_BOOT_CONTROL); vendor/twrp does not
+    # reference it.
+    if ! search_tree "OF_USE_AIDL_BOOT_CONTROL" "${TOP_DIR}/bootable/recovery"; then
+        fail "OrangeFox bootable/recovery does not support OF_USE_AIDL_BOOT_CONTROL"
     fi
     check_file "${TOP_DIR}/bootable/recovery/gui/theme/common/languages/it_IT.xml"
     if [ -f "${TOP_DIR}/bootable/recovery/gui/theme/common/languages/it_IT.xml" ]; then
