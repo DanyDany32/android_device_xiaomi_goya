@@ -16,7 +16,7 @@ DEVICE_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 TOP_DIR="${1:-${ORANGEFOX_TOP:-$(cd -- "${DEVICE_DIR}/../../.." && pwd -P)}}"
 BUILD_DIR="${TOP_DIR}/build/make"
 BUILD_PATCH="${DEVICE_DIR}/patches/orangefox-build-make.patch"
-EXPECTED_BUILD_PATCH_SHA256="5f2d3f43a4d78eee6d560a4a169df30fc95de6fa2ed294e3210e684a641a8329"
+EXPECTED_BUILD_PATCH_SHA256="0f1e0679fc4ab9a65d38a0d79d65f47704cd4f96240e1717d7791da209303b2e"
 
 apply_patch_once() {
     local repository="$1"

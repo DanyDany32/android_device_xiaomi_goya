@@ -225,7 +225,7 @@ check_contains "${DEVICE_DIR}/fox_callback.sh" "xiaomi_touch_goya.ko|nt38771_tou
 check_contains "${DEVICE_DIR}/build-lowmem.sh" "vendorbootimage" "low-memory build does not target vendor_boot"
 check_contains "${DEVICE_DIR}/build-lowmem.sh" "twrp_goya-ap2a-eng" "low-memory build lunch target is wrong"
 
-check_sha256 "${DEVICE_DIR}/patches/orangefox-build-make.patch" "5f2d3f43a4d78eee6d560a4a169df30fc95de6fa2ed294e3210e684a641a8329"
+check_sha256 "${DEVICE_DIR}/patches/orangefox-build-make.patch" "0f1e0679fc4ab9a65d38a0d79d65f47704cd4f96240e1717d7791da209303b2e"
 check_sha256 "${DEVICE_DIR}/manifests/orangefox-fox_14.1-pinned.xml" "7262c93f87eaecaa11e6cfde06a7be22b4bb81697d94e74c8c01500ab90a3f60"
 
 # Stock vendor_boot inputs

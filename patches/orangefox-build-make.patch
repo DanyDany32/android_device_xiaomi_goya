@@ -1,5 +1,5 @@
 diff --git a/core/Makefile b/core/Makefile
-index 832a155..b988366 100644
+index 832a155..dd20d16 100644
 --- a/core/Makefile
 +++ b/core/Makefile
 @@ -1705,6 +1705,40 @@ $(INSTALLED_VENDOR_BOOTIMAGE_TARGET): $(AVBTOOL) $(BOARD_AVB_VENDOR_BOOTIMAGE_KE
@@ -43,8 +43,18 @@ index 832a155..b988366 100644
  else
  $(INSTALLED_VENDOR_BOOTIMAGE_TARGET):
  	$(call pretty,"Target vendor_boot image: $@")
-@@ -2739,6 +2773,35 @@ $(INTERNAL_RECOVERY_RAMDISK_FILES_TIMESTAMP): $(MKBOOTFS) \
+@@ -2737,8 +2771,45 @@ $(INTERNAL_RECOVERY_RAMDISK_FILES_TIMESTAMP): $(MKBOOTFS) \
+ 	mkdir -p $(TARGET_RECOVERY_ROOT_OUT)/sdcard $(TARGET_RECOVERY_ROOT_OUT)/tmp
+ 	# Copying baseline ramdisk...
  	# Use rsync because "cp -Rf" fails to overwrite broken symlinks on Mac.
++	# Darth9: PRODUCT_COPY_FILES can populate recovery/root/odm/etc and
++	# recovery/root/vendor before this rsync runs. Replace the GSI fallback
++	# symlinks with real directories so rsync can merge those files instead
++	# of failing with "cannot delete non-empty directory".
++	if [ -L $(TARGET_ROOT_OUT)/odm/etc ]; then rm -f $(TARGET_ROOT_OUT)/odm/etc; fi
++	mkdir -p $(TARGET_ROOT_OUT)/odm/etc
++	if [ -L $(TARGET_ROOT_OUT)/vendor ]; then rm -f $(TARGET_ROOT_OUT)/vendor; fi
++	mkdir -p $(TARGET_ROOT_OUT)/vendor
  	rsync -a --exclude=sdcard $(IGNORE_RECOVERY_SEPOLICY) $(IGNORE_CACHE_LINK) $(TARGET_ROOT_OUT) $(TARGET_RECOVERY_OUT)
  	# Modifying ramdisk contents...
 +
@@ -79,7 +89,7 @@ index 832a155..b988366 100644
  	ln -sf /system/bin/init $(TARGET_RECOVERY_ROOT_OUT)/init
  	# Removes $(TARGET_RECOVERY_ROOT_OUT)/init*.rc EXCEPT init.recovery*.rc.
  	find $(TARGET_RECOVERY_ROOT_OUT) -maxdepth 1 -name 'init*.rc' -type f -not -name "init.recovery.*.rc" | xargs rm -f
-@@ -2758,10 +2821,11 @@ $(INTERNAL_RECOVERY_RAMDISK_FILES_TIMESTAMP): $(MKBOOTFS) \
+@@ -2758,10 +2829,11 @@ $(INTERNAL_RECOVERY_RAMDISK_FILES_TIMESTAMP): $(MKBOOTFS) \
  	$(if $(strip $(recovery_wipe)), \
  	  cp -f $(recovery_wipe) $(TARGET_RECOVERY_ROOT_OUT)/system/etc/recovery.wipe)
  	ln -sf prop.default $(TARGET_RECOVERY_ROOT_OUT)/default.prop
@@ -93,7 +103,7 @@ index 832a155..b988366 100644
  	$(BOARD_RECOVERY_IMAGE_PREPARE)
  	$(hide) touch $@
  
-@@ -2823,6 +2887,32 @@ $(INSTALLED_BOOTIMAGE_TARGET): $(recoveryimage-deps)
+@@ -2823,6 +2895,32 @@ $(INSTALLED_BOOTIMAGE_TARGET): $(recoveryimage-deps)
  	$(call pretty,"Target boot image from recovery: $@")
  	$(call build-recoveryimage-target, $@, $(PRODUCT_OUT)/$(subst .img,,$(subst boot,kernel,$(notdir $@))))
  
@@ -126,7 +136,7 @@ index 832a155..b988366 100644
  $(call declare-container-license-metadata,$(INSTALLED_BOOTIMAGE_TARGET),SPDX-license-identifier-GPL-2.0-only SPDX-license-identifier-Apache-2.0,restricted notice,$(BUILD_SYSTEM)/LINUX_KERNEL_COPYING build/soong/licenses/LICENSE,"Boot Image",bool)
  $(call declare-container-license-deps,$(INSTALLED_BOOTIMAGE_TARGET),$(recoveryimage-deps),$(PRODUCT_OUT)/:/)
  
-@@ -2863,6 +2953,34 @@ endif # BUILDING_RECOVERY_IMAGE
+@@ -2863,6 +2961,34 @@ endif # BUILDING_RECOVERY_IMAGE
  .PHONY: recoveryimage
  recoveryimage: $(INSTALLED_RECOVERYIMAGE_TARGET) $(RECOVERY_RESOURCE_ZIP)
  
