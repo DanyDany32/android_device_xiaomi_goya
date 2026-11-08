@@ -709,7 +709,10 @@ jobs:
       - name: Download release artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: orangefox-goya-release-*-${{ github.run_id }}-${{ github.run_attempt }}
+          # Match the artifact name exactly. A wildcard such as
+          # `orangefox-goya-release-*-<run>-<attempt>` needs an extra literal
+          # hyphen and therefore never matches the uploaded name.
+          pattern: orangefox-goya-release-${{ github.run_id }}-${{ github.run_attempt }}
           path: release-artifacts
           merge-multiple: true
 

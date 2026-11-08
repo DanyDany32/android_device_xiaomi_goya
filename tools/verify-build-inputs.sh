@@ -222,6 +222,7 @@ check_contains "${DEVICE_DIR}/tools/build-system-compatible-vendor-boot.sh" "med
 check_contains "${DEVICE_DIR}/tools/patch-vendor-boot-dtb.py" "mediatek,usb-offload" "DTB patcher does not target the USB offload property"
 check_contains "${DEVICE_DIR}/tools/patch-vendor-boot-dtb.py" "--check-absent" "DTB patcher has no structural property check"
 check_contains "${DEVICE_DIR}/.github/workflows/build-orangefox.yml" "--check-absent mediatek,usb-offload" "release validation does not check the DTB property structurally"
+check_contains "${DEVICE_DIR}/.github/workflows/build-orangefox.yml" 'pattern: orangefox-goya-release-${{ github.run_id }}-${{ github.run_attempt }}' "release job does not select the uploaded artifact name exactly"
 check_contains "${DEVICE_DIR}/tools/unpack-vendor-boot.py" "VENDOR_HEADER_V4_SIZE" "vendor_boot v4 parser is missing"
 check_contains "${DEVICE_DIR}/fox_callback.sh" "vendor.xiaomi.hw.touchfeature-service-recovery" "touchfeature service is not in the UPX list"
 check_contains "${DEVICE_DIR}/fox_callback.sh" "xiaomi_touch_goya.ko|nt38771_touch_goya.ko|si_haptic.ko|scp.ko" "recovery module pruning list is missing"
