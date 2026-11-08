@@ -109,6 +109,11 @@ fi
 
 # UPX is optional on goya. Only compress binaries that exist in this build;
 # Stage 1 images may not contain the touchfeature HAL or KeyMint binaries.
+#
+# Compression must never fail the build: the stock InfoZip ziptool binary, for
+# example, is rejected by the old OrangeFox UPX with "checksum error". Pack a
+# throwaway copy, verify it, and only then replace the original. Binaries that
+# UPX cannot pack stay untouched and the ramdisk remains bootable.
 upx_bin="vendor/recovery/tools/upx"
 if [ -x "$upx_bin" ]; then
     upx_binaries=(
@@ -124,9 +129,28 @@ if [ -x "$upx_bin" ]; then
     for name in "${upx_binaries[@]}"; do
         binary="$ramdisk/system/bin/$name"
         [ -f "$binary" ] || continue
+        # Do not turn symlinks or hardlinks into extra copies of the target.
+        if [ -L "$binary" ] || [ "$(stat -c %h "$binary")" -gt 1 ]; then
+            continue
+        fi
         chmod 0755 "$binary"
-        "$upx_bin" -q --lzma "$binary" >/dev/null
-        "$upx_bin" -q -t "$binary" >/dev/null
+
+        # A previous pass or the vendor blob may already be UPX-packed.
+        if "$upx_bin" -q -l "$binary" >/dev/null 2>&1; then
+            echo "-- UPX: $name is already packed"
+            continue
+        fi
+
+        packed="$binary.upx-tmp"
+        rm -f "$packed"
+        cp -fp "$binary" "$packed"
+        if "$upx_bin" -q --lzma "$packed" >/dev/null 2>&1 &&
+                "$upx_bin" -q -t "$packed" >/dev/null 2>&1; then
+            mv -f "$packed" "$binary"
+        else
+            rm -f "$packed"
+            echo "warning: UPX cannot pack $name; leaving it uncompressed" >&2
+        fi
     done
 else
     echo "warning: OrangeFox UPX binary not found; skipping compression" >&2
