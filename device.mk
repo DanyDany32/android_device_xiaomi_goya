@@ -65,6 +65,14 @@ PRODUCT_PACKAGES_DEBUG += \
     bootctl \
     logcat
 
+# fastbootd waits for android.hardware.health.IHealth/default before it opens
+# the fastboot FunctionFS endpoint. The compact stock recovery binary is
+# started by init.recovery.mt6899.rc as health-aidl with the recovery SELinux
+# domain; the stock rc cannot be used because class hal and the
+# hal_health_default domain do not exist in this recovery.
+PRODUCT_COPY_FILES += \
+    $(DEVICE_PATH)/prebuilt/health/android.hardware.health-service.example_recovery:recovery/root/system/bin/android.hardware.health-service.example_recovery
+
 # Recovery init / configuration. These files are also present below
 # recovery/root; the explicit copies document what must end up in the
 # OrangeFox fragment and make the dependency visible to PRODUCT_COPY_FILES.

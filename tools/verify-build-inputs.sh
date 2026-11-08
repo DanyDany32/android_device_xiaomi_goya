@@ -104,9 +104,11 @@ for relative in \
     .gitignore \
     prebuilt/README.md \
     prebuilt/dtb/mt6899-goya.dtb \
+    prebuilt/health/android.hardware.health-service.example_recovery \
     prebuilt/vendor-boot/header.json \
     prebuilt/vendor-boot/bootconfig \
     patches/orangefox-build-make.patch \
+    patches/vold-fbe-secdisc-fallback.patch \
     manifests/orangefox-fox_14.1-pinned.xml \
     tools/apply-orangefox-patches.sh \
     tools/build-system-compatible-vendor-boot.sh \
@@ -199,6 +201,9 @@ check_contains "${DEVICE_DIR}/recovery/root/init.recovery.mt6899.rc" "start vend
 check_absent "${DEVICE_DIR}/recovery/root/init.recovery.mt6899.rc" "start vendor.boot-mediatek" "only the vendor.boot-mtk service exists"
 check_contains "${DEVICE_DIR}/recovery/root/init.recovery.mt6899.rc" "import /init.recovery.keymint.rc" "KeyMint rc is not imported"
 check_contains "${DEVICE_DIR}/recovery/root/init.recovery.mt6899.rc" "vendor.xiaomi.hw.touchfeature-service-recovery" "touchfeature service is missing"
+check_contains "${DEVICE_DIR}/recovery/root/init.recovery.mt6899.rc" "service health-aidl /system/bin/android.hardware.health-service.example_recovery" "AIDL health service is missing"
+check_contains "${DEVICE_DIR}/recovery/root/init.recovery.mt6899.rc" "start health-aidl" "AIDL health service is not started"
+check_contains "${DEVICE_DIR}/device.mk" "prebuilt/health/android.hardware.health-service.example_recovery" "AIDL health binary is not packaged"
 check_contains "${DEVICE_DIR}/recovery/root/init.recovery.keymint.rc" "android.hardware.security.keymint@3.0-service.mitee" "KeyMint service is missing"
 check_contains "${DEVICE_DIR}/recovery/root/init.recovery.keymint.rc" "interface aidl android.hardware.security.keymint.IKeyMintDevice/default" "KeyMint AIDL instance is not declared"
 check_contains "${DEVICE_DIR}/recovery/root/init.recovery.keymint.rc" "interface aidl android.hardware.gatekeeper.IGatekeeper/default" "Gatekeeper AIDL instance is not declared"
@@ -230,6 +235,9 @@ check_contains "${DEVICE_DIR}/build-lowmem.sh" "vendorbootimage" "low-memory bui
 check_contains "${DEVICE_DIR}/build-lowmem.sh" "twrp_goya-ap2a-eng" "low-memory build lunch target is wrong"
 
 check_sha256 "${DEVICE_DIR}/patches/orangefox-build-make.patch" "0f1e0679fc4ab9a65d38a0d79d65f47704cd4f96240e1717d7791da209303b2e"
+check_sha256 "${DEVICE_DIR}/patches/vold-fbe-secdisc-fallback.patch" "3336c36e22b8972eea8d25f0b2e4932525171b31e81c5674731604c6b727c1d8"
+check_contains "${DEVICE_DIR}/tools/apply-orangefox-patches.sh" "patches/vold-fbe-secdisc-fallback.patch" "vold fallback patch is not applied by the patch script"
+check_contains "${DEVICE_DIR}/tools/apply-orangefox-patches.sh" "findSecdiscFallback" "vold fallback marker check is missing from the patch script"
 check_sha256 "${DEVICE_DIR}/manifests/orangefox-fox_14.1-pinned.xml" "7262c93f87eaecaa11e6cfde06a7be22b4bb81697d94e74c8c01500ab90a3f60"
 
 # Stock vendor_boot inputs
@@ -504,6 +512,9 @@ if [ -n "$TOP_DIR" ]; then
     # reference it.
     if ! search_tree "OF_USE_AIDL_BOOT_CONTROL" "${TOP_DIR}/bootable/recovery"; then
         fail "OrangeFox bootable/recovery does not support OF_USE_AIDL_BOOT_CONTROL"
+    fi
+    if ! search_tree "findSecdiscFallback" "${TOP_DIR}/system/vold"; then
+        fail "goya system/vold secdis fallback patch is not applied"
     fi
     check_file "${TOP_DIR}/bootable/recovery/gui/theme/common/languages/it_IT.xml"
     if [ -f "${TOP_DIR}/bootable/recovery/gui/theme/common/languages/it_IT.xml" ]; then

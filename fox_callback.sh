@@ -71,10 +71,15 @@ if [ -s "$stock_recovery_modules" ]; then
         "$ramdisk/lib/modules/modules.load.recovery"
 fi
 
-# The stock recovery declares an AIDL Health example service that the
-# OrangeFox recovery fragment does not provide. Leaving the manifest in the
-# fragment makes servicemanager wait for a service that never starts, which
-# blocks fastbootd before USB is ready.
+# fastbootd waits for android.hardware.health.IHealth/default before it opens
+# /dev/usb-ffs/fastboot. The stock rc declares the service with class hal and
+# the hal_health_default SELinux domain, neither of which exists in this
+# recovery, so it never starts. device.mk installs the compact stock recovery
+# binary as system/bin/android.hardware.health-service.example_recovery and
+# init.recovery.mt6899.rc starts it as health-aidl with the recovery domain.
+# Drop the stock rc, the redundant system/bin/hw copy and any stale manifest:
+# the manifest makes servicemanager wait for a service that starts too late,
+# and the build repacker rejects a recovery fragment that still contains it.
 rm -f \
     "$ramdisk/vendor/etc/vintf/manifest/android.hardware.health-service.example.xml" \
     "$ramdisk/system/etc/vintf/manifest/android.hardware.health-service.example.xml" \
@@ -206,6 +211,7 @@ for helper in \
     load-touch-modules.sh \
     wait-touch-service.sh \
     load-haptics-module.sh \
+    android.hardware.health-service.example_recovery \
     vendor.xiaomi.hw.touchfeature-service-recovery; do
     if [ -f "$ramdisk/system/bin/$helper" ]; then
         chmod 0755 "$ramdisk/system/bin/$helper"

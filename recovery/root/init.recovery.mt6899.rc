@@ -34,6 +34,19 @@ service goya-haptics-loader /system/bin/load-haptics-module.sh
     group root input system
     seclabel u:r:recovery:s0
 
+# fastbootd waits for the AIDL health HAL android.hardware.health.IHealth/default
+# before it opens functionfs. The HIDL 2.1 service alone is not enough, so keep
+# the compact stock recovery health service and run it with the stock libc++
+# already present in /vendor/lib64. The stock rc uses class hal and the
+# hal_health_default SELinux domain, neither of which exists in this recovery;
+# start the service explicitly as recovery instead.
+service health-aidl /system/bin/android.hardware.health-service.example_recovery
+    disabled
+    user root
+    group root system
+    setenv LD_LIBRARY_PATH /vendor/lib64:/system/lib64
+    seclabel u:r:recovery:s0
+
 on early-init
     write /sys/fs/selinux/enforce 0
     setprop vendor.haptics.ready 0
@@ -104,6 +117,8 @@ on property:vendor.touch.service.ready=1
     start goya-haptics-loader
 
 on boot
+    # Start the AIDL health service before recovery can enter fastboot.
+    start health-aidl
     # fastbootd waits for the AIDL BootControl service before opening
     # /dev/usb-ffs/fastboot. The service uses class early_hal, while the
     # recovery init flow only class-starts default and hal.

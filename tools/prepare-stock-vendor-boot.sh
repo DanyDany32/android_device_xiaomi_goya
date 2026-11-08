@@ -37,6 +37,8 @@ Extracts:
   prebuilt/vendor-boot/dtb                Stock DTB
   prebuilt/vendor-boot/bootconfig         Stock bootconfig (may be empty)
   prebuilt/vendor-boot/header.json        Vendor_boot v4 ramdisk table
+  prebuilt/health/android.hardware.health-service.example_recovery
+                                          Compact AIDL Health HAL for recovery
   prebuilt/dtb/mt6899-goya.dtb            Copy used by the repacker/Make
   prebuilt/vendor_boot_stock.sha256       Hash of the source image
 EOF
@@ -266,6 +268,32 @@ else
     echo "WARNING: no stock modules.load.recovery could be extracted" >&2
 fi
 
+# Keep the compact stock AIDL Health service. The final repacker prunes it from
+# the platform fragment, so the recovery fragment must carry its own copy;
+# init.recovery.mt6899.rc starts it as health-aidl because the stock rc uses a
+# class and SELinux domain that do not exist in this recovery.
+health_dest="${DEVICE_DIR}/prebuilt/health/android.hardware.health-service.example_recovery"
+if [ -n "${platform_file:-}" ] && [ -f "${work_dir}/${platform_file}" ]; then
+    health_cpio="${work_dir}/stock-platform-health.cpio"
+    if decompress_fragment "${work_dir}/${platform_file}" "$health_cpio"; then
+        health_entry="$(cpio -it --quiet < "$health_cpio" | \
+            grep -E '^(\./)?system/bin/hw/android\.hardware\.health-service\.example_recovery$' | \
+            head -n 1 || true)"
+        if [ -n "$health_entry" ]; then
+            mkdir -p "$(dirname -- "$health_dest")"
+            cpio -i --quiet --to-stdout "$health_entry" < "$health_cpio" \
+                > "${health_dest}.tmp.$$"
+            mv -f "${health_dest}.tmp.$$" "$health_dest"
+            echo "AIDL health service: ${health_dest}"
+        else
+            echo "WARNING: platform fragment has no AIDL health service" >&2
+        fi
+    else
+        echo "WARNING: cannot decompress the platform fragment; AIDL health service not extracted" >&2
+    fi
+    rm -f "$health_cpio"
+fi
+
 # The stock recovery fragment is replaced by the OrangeFox one and is not an
 # input to the repacker. Drop it after reading its module list so the
 # committed prebuilt tree only contains inputs that are actually reused.
@@ -302,6 +330,9 @@ echo "  platform fragment : ${PREBUILT_DIR}/${platform_file}"
 echo "  DTB               : ${DTB_DEST}"
 echo "  bootconfig        : ${PREBUILT_DIR}/bootconfig"
 echo "  header            : ${PREBUILT_DIR}/header.json"
+if [ -f "${health_dest}" ]; then
+    echo "  AIDL health       : ${health_dest}"
+fi
 if [ -f "${PREBUILT_DIR}/modules.load.recovery" ]; then
     echo "  recovery modules  : ${PREBUILT_DIR}/modules.load.recovery"
 fi

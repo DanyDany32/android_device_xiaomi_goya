@@ -332,7 +332,7 @@ fi
 
 mkdir -p "${DEVICE_DIR}/manifests"
 hash_dirs=()
-for directory in prebuilt/vendor-boot prebuilt/dtb prebuilt/modules proprietary; do
+for directory in prebuilt/vendor-boot prebuilt/dtb prebuilt/health prebuilt/modules proprietary; do
     if [ -d "${DEVICE_DIR}/${directory}" ]; then
         hash_dirs+=("$directory")
     fi

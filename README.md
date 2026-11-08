@@ -20,7 +20,7 @@ composta da:
 | Fase | Contenuto | Stato |
 | --- | --- | --- |
 | Stage 1 | boot, display, touch, ADB, MTP, fastbootd | input importati dal firmware OS3.0.311.0 |
-| Stage 2 | decrypt FBE/Metadata con KeyMint/Gatekeeper/Weaver e TouchReport | blob TEE e dipendenze importati; decrypt da validare sul dispositivo |
+| Stage 2 | decrypt FBE/Metadata con KeyMint/Gatekeeper/Weaver e TouchReport | blob TEE e dipendenze importati; decrypt FBE validato sul dispositivo (protector secdis) |
 
 Senza i blob ODM/TEE la build funziona comunque e produce una immagine Stage 1
 senza decrypt. `tools/verify-build-inputs.sh --require-blobs` serve a imporre
@@ -206,10 +206,23 @@ Il device tree include già:
 Per completare il decrypt servono i TA MiTEE e le librerie TEE importati dal
 dump. Il TA MiFace (~29 MiB, face unlock TEE) viene invece scartato: recovery
 non avvia la HAL face e il container è quasi incomprimibile, quindi includerlo
-porterebbe il ramdisk combinato oltre il budget di 100 MB. Se
-`verify-build-inputs.sh` segnala Weaver assente, il device può comunque provare
-la derivazione delle chiavi via Gatekeeper; verificare il log `recovery.log` in
-caso di errore.
+porterebbe il ramdisk combinato oltre il budget di 100 MB.
+
+Il decrypt FBE è stato validato sul dispositivo. Il firmware stock mantiene,
+accanto al protector Weaver, un secondo protector LSKF basato su
+Gatekeeper/`.secdis` con lo stesso PIN (stesso salt e parametri scrypt). Il
+protector secdis non richiede né l'eSE né lo stack OMAPI, quindi la recovery lo
+usa come fallback. La patch `patches/vold-fbe-secdisc-fallback.patch`, applicata
+a `system/vold` da `tools/apply-orangefox-patches.sh`, fa scegliere a
+`KeystoreInfo::getHandle()` il protector secdis quando quello corrente usa
+Weaver e ne esiste uno con gli stessi parametri `.pwd`. Il percorso Weaver
+resta invariato per i dispositivi con eSE/OMAPI funzionante.
+
+Verifica eseguita: log `using secdis to decrypt spblob` → `GateKeeper status ok`
+→ `User 0 Decrypted Successfully!`, con `/data/data` e `/data/media/0`
+accessibili. Se `verify-build-inputs.sh` segnala Weaver assente, il device può
+comunque usare il protector secdis; verificare il log `recovery.log` in caso di
+errore.
 
 ## 6. Troubleshooting
 
@@ -219,6 +232,7 @@ caso di errore.
 | Touch assente | moduli `xiaomi_touch_goya.ko` / `nt38771_touch_goya.ko` o HAL non importati |
 | ADB/MTP assenti | `mtu3.ko`, `xhci-mtk-hcd-v2.ko`, `extcon-mtk-usb.ko` mancanti dal platform fragment |
 | Decrypt non parte | KeyMint/TA MiTEE assenti, `/persist` non montato, manifest VINTF sotto `/system` |
+| Decrypt fallisce sul protector Weaver | eSE/OMAPI non disponibili in recovery; verificare che esista un protector `.secdis` con lo stesso salt e che la patch vold sia applicata (`findSecdiscFallback` in `KeystoreInfo.cpp`) |
 | Fastbootd non cambia slot | servizio AIDL BootControl stock assente dal platform fragment |
 | Build senza moduli display | `prebuilt/vendor-boot/` non importato |
 

@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 #
-# Apply the single generic OrangeFox build/make patch required by goya.
+# Apply the generic OrangeFox build/make patch and the goya-specific
+# system/vold FBE fallback patch.
+#
+# The vold patch makes TWRP prefer a Gatekeeper/secdis LSKF protector when the
+# current protector uses Weaver. Recovery on goya has no OMAPI/eSE stack for
+# Weaver, but the stock firmware keeps a secdis protector for the same LSKF.
 #
 # This script deliberately does not apply the rodin-specific
 # orangefox-recovery.patch or orangefox-vendor-twrp.patch. Goya uses the
@@ -17,6 +22,9 @@ TOP_DIR="${1:-${ORANGEFOX_TOP:-$(cd -- "${DEVICE_DIR}/../../.." && pwd -P)}}"
 BUILD_DIR="${TOP_DIR}/build/make"
 BUILD_PATCH="${DEVICE_DIR}/patches/orangefox-build-make.patch"
 EXPECTED_BUILD_PATCH_SHA256="0f1e0679fc4ab9a65d38a0d79d65f47704cd4f96240e1717d7791da209303b2e"
+VOLD_DIR="${TOP_DIR}/system/vold"
+VOLD_PATCH="${DEVICE_DIR}/patches/vold-fbe-secdisc-fallback.patch"
+EXPECTED_VOLD_PATCH_SHA256="3336c36e22b8972eea8d25f0b2e4932525171b31e81c5674731604c6b727c1d8"
 
 apply_patch_once() {
     local repository="$1"
@@ -53,8 +61,9 @@ if [ ! -f "${TOP_DIR}/build/envsetup.sh" ]; then
     echo "Pass the source root as the first argument or set ORANGEFOX_TOP." >&2
     exit 1
 fi
-if [ ! -d "$BUILD_DIR" ] || [ ! -d "${TOP_DIR}/vendor/twrp" ] || [ ! -d "${TOP_DIR}/bootable/recovery" ]; then
-    echo "ERROR: OrangeFox build/make, vendor/twrp or bootable/recovery is missing" >&2
+if [ ! -d "$BUILD_DIR" ] || [ ! -d "$VOLD_DIR" ] || \
+        [ ! -d "${TOP_DIR}/vendor/twrp" ] || [ ! -d "${TOP_DIR}/bootable/recovery" ]; then
+    echo "ERROR: OrangeFox build/make, system/vold, vendor/twrp or bootable/recovery is missing" >&2
     exit 1
 fi
 
@@ -71,6 +80,13 @@ check_sha256() {
 
 check_sha256 "$BUILD_PATCH" "$EXPECTED_BUILD_PATCH_SHA256"
 apply_patch_once "$BUILD_DIR" "$BUILD_PATCH" "OrangeFox build/make"
+
+check_sha256 "$VOLD_PATCH" "$EXPECTED_VOLD_PATCH_SHA256"
+apply_patch_once "$VOLD_DIR" "$VOLD_PATCH" "TWRP vold FBE secdis fallback"
+if ! grep -qsF -- 'findSecdiscFallback' "$VOLD_DIR/KeystoreInfo.cpp"; then
+    echo "ERROR: system/vold FBE secdis fallback patch marker is missing" >&2
+    exit 1
+fi
 
 # The OrangeFox sync repository must provide the post-build hook and the
 # OrangeFox 14.1 recovery makefiles. These are not part of AOSP.

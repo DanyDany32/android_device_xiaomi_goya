@@ -13,6 +13,7 @@ release. Do not mix files from different builds.
 | `vendor-boot/modules.load.recovery` | stock platform fragment (`vendor_ramdisk00`) | first-stage recovery module list reused by `fox_callback.sh`; includes the MTK IPI/RPMSG mailbox modules missing from the normal `modules.load`. The recovery fragment is used only as a fallback for layouts that keep the list there. |
 | `vendor-boot/dtb` | DTB from `vendor_boot.img` | MediaTek-wrapped FDT, kept byte-identical |
 | `vendor-boot/bootconfig` | vendor bootconfig | may be empty |
+| `health/android.hardware.health-service.example_recovery` | `vendor_boot.img` platform fragment | compact AIDL Health HAL started by `init.recovery.mt6899.rc` as `health-aidl`; fastbootd waits for `android.hardware.health.IHealth/default`. Extracted by `prepare-stock-vendor-boot.sh`. |
 | `dtb/mt6899-goya.dtb` | copy of `vendor-boot/dtb` | consumed by the build and repacker |
 | `modules/*.ko` | stock `vendor_dlkm` | `xiaomi_touch_goya.ko`, `nt38771_touch_goya.ko`, `si_haptic.ko`, `scp.ko` |
 | `vendor_boot_stock.sha256` | full stock image | provenance checksum only |
