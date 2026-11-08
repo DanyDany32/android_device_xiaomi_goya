@@ -546,10 +546,11 @@ jobs:
           platform_file="$(printf '%s\n' "$entries" | sed -n '1p')"
           recovery_file="$(printf '%s\n' "$entries" | sed -n '2p')"
 
-          if strings -a "$inspect_dir/dtb" | grep -qx 'mediatek,usb-offload'; then
-            echo "::error::repacked DTB still contains mediatek,usb-offload" >&2
-            exit 1
-          fi
+          # Parse the FDT instead of grepping the raw strings: the removed
+          # property name may stay in the unused string table or appear as a
+          # compatible value of the offload node itself.
+          python3 "$device/tools/patch-vendor-boot-dtb.py" \
+            --input "$inspect_dir/dtb" --check-absent mediatek,usb-offload
 
           lz4 -d -f "$inspect_dir/$platform_file" "$platform_cpio" >/dev/null
           for module in \

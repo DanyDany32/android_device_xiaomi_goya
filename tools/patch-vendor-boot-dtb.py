@@ -9,6 +9,12 @@ provider, so the optional property is deleted from a temporary copy.
 
 Usage:
     patch-vendor-boot-dtb.py --input dtb --output dtb.patched
+    patch-vendor-boot-dtb.py --input dtb --check-absent mediatek,usb-offload
+
+The --check-absent mode verifies the flattened device tree structurally. A
+plain `strings` search is not enough: the property name may remain in the
+unused part of the FDT string table, or the same text may appear as a
+`compatible` value of a different node.
 """
 
 from __future__ import annotations
@@ -144,7 +150,7 @@ class Fdt:
         return bytes(blob)
 
 
-def patch_mtk_dtb(data: bytes) -> tuple[bytes, int]:
+def open_mtk_fdt(data: bytes) -> tuple[Fdt, int]:
     if len(data) < MTK_HEADER_SIZE:
         raise ValueError("DTB is smaller than the MTK header")
     magic = struct.unpack_from("<I", data, 0)[0]
@@ -154,8 +160,11 @@ def patch_mtk_dtb(data: bytes) -> tuple[bytes, int]:
     fdt_offset = struct.unpack_from(">I", data, 0x24)[0]
     if fdt_offset + fdt_size > len(data):
         raise ValueError("MTK FDT size/offset exceed the input length")
+    return Fdt(data[fdt_offset:fdt_offset + fdt_size]), fdt_offset
 
-    fdt = Fdt(data[fdt_offset:fdt_offset + fdt_size])
+
+def patch_mtk_dtb(data: bytes) -> tuple[bytes, int]:
+    fdt, fdt_offset = open_mtk_fdt(data)
     removed = fdt.strip_property("mediatek,usb-offload")
     new_fdt = fdt.rebuild()
 
@@ -177,13 +186,32 @@ def patch_mtk_dtb(data: bytes) -> tuple[bytes, int]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", required=True)
-    parser.add_argument("--output", required=True)
+    parser.add_argument("--output")
     parser.add_argument("--allow-missing", action="store_true",
                         help="copy the input unchanged if the property is absent")
+    parser.add_argument("--check-absent", metavar="PROPERTY",
+                        help="only verify that no property with this name exists")
     args = parser.parse_args()
 
     with open(args.input, "rb") as handle:
         data = handle.read()
+
+    if args.check_absent:
+        try:
+            fdt, _ = open_mtk_fdt(data)
+            present = fdt.strip_property(args.check_absent)
+        except ValueError as error:
+            print(f"error: {error}", file=sys.stderr)
+            return 1
+        if present:
+            print(f"error: DTB still declares property {args.check_absent}",
+                  file=sys.stderr)
+            return 1
+        print(f"checked DTB: property {args.check_absent} is absent")
+        return 0
+
+    if not args.output:
+        parser.error("--output is required unless --check-absent is used")
 
     try:
         output, removed = patch_mtk_dtb(data)
