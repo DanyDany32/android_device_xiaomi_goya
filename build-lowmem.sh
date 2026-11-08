@@ -110,9 +110,14 @@ set -u
 echo "log: ${LOG_FILE}"
 echo "targets: ${TARGETS[*]}"
 
+# envsetup.sh's _trigger_build reads ANDROID_BUILD_BANNER without a default.
+# Keep nounset disabled for the wrapper call so a successful build does not
+# fail in the post-build banner.
 set +e
+set +u
 mka -j"${OF_BUILD_JOBS}" "${TARGETS[@]}" 2>&1 | tee "${LOG_FILE}"
 status=${PIPESTATUS[0]}
+set -u
 set -e
 
 if [ "${status}" -ne 0 ]; then
