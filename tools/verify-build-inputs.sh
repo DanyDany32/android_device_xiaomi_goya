@@ -182,6 +182,7 @@ check_contains "${DEVICE_DIR}/device.mk" "PRODUCT_SHIPPING_API_LEVEL := 34" "Ora
 check_contains "${DEVICE_DIR}/device.mk" "create_pl_dev.recovery" "create_pl_dev recovery variant is missing"
 check_contains "${DEVICE_DIR}/device.mk" "libgoya_libcxx_compat" "libc++ compatibility shim is not packaged"
 check_contains "${DEVICE_DIR}/device.mk" "-include \$(DEVICE_PATH)/proprietary/blobs.mk" "generated blob rules are not included"
+check_absent "${DEVICE_DIR}/proprietary/blobs.mk" "a3ba6512-6e0e-4065-93165e4a7d04ca08.ta" "the MiFace face-unlock TA must stay out of the recovery fragment"
 check_contains "${DEVICE_DIR}/AndroidProducts.mk" "twrp_goya-ap2a-eng" "lunch target is missing"
 check_contains "${DEVICE_DIR}/Android.bp" 'name: "libgoya_libcxx_compat"' "compat library module is missing"
 check_contains "${DEVICE_DIR}/libcxx_compat/libcxx_compat.cpp" '_ZNSt3__122__libcpp_verbose_abortEPKcz' "libc++ abort symbol is missing"

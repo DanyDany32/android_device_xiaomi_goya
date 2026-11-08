@@ -110,5 +110,4 @@ PRODUCT_COPY_FILES += \
     $(DEVICE_PATH)/proprietary/vendor/mitee/ta/dba51a17-0563-11e7-93b16fa7b0071a51.ta:recovery/root/vendor/mitee/ta/dba51a17-0563-11e7-93b16fa7b0071a51.ta \
     $(DEVICE_PATH)/proprietary/vendor/mitee/ta/e97c270e-a5c4-4c58-bcd3384a2fa2539e.ta:recovery/root/vendor/mitee/ta/e97c270e-a5c4-4c58-bcd3384a2fa2539e.ta \
     $(DEVICE_PATH)/proprietary/odm/mitee/ta/123af5d1-d6f5-cc54-f78fa19030b2e76a.ta:recovery/root/odm/mitee/ta/123af5d1-d6f5-cc54-f78fa19030b2e76a.ta \
-    $(DEVICE_PATH)/proprietary/odm/mitee/ta/a3ba6512-6e0e-4065-93165e4a7d04ca08.ta:recovery/root/odm/mitee/ta/a3ba6512-6e0e-4065-93165e4a7d04ca08.ta \
     $(DEVICE_PATH)/proprietary/odm/mitee/ta/d32d9207-6285-6d86-6cb98eaf46f6b4ec.ta:recovery/root/odm/mitee/ta/d32d9207-6285-6d86-6cb98eaf46f6b4ec.ta

@@ -77,7 +77,8 @@ Lo script legge:
 - `vendor_boot` dello slot corrente (112 MiB);
 - i quattro moduli `vendor_dlkm`;
 - HAL touch, librerie, firmware e config Novatek;
-- KeyMint/Gatekeeper/Weaver MiTEE, `tee-supplicant`, librerie TEE e TA;
+- KeyMint/Gatekeeper/Weaver MiTEE, `tee-supplicant`, librerie TEE e TA
+  (il TA MiFace da ~29 MiB è escluso: recovery non avvia la HAL face);
 - firmware haptics AW8697.
 
 Viene prodotto anche `meta/build-info.txt` con le proprietà del firmware, utile
@@ -203,9 +204,12 @@ Il device tree include già:
 - librerie touch e servizio TouchReport per la UI.
 
 Per completare il decrypt servono i TA MiTEE e le librerie TEE importati dal
-dump. Se `verify-build-inputs.sh` segnala Weaver assente, il device può comunque
-provare la derivazione delle chiavi via Gatekeeper; verificare il log
-`recovery.log` in caso di errore.
+dump. Il TA MiFace (~29 MiB, face unlock TEE) viene invece scartato: recovery
+non avvia la HAL face e il container è quasi incomprimibile, quindi includerlo
+porterebbe il ramdisk combinato oltre il budget di 100 MB. Se
+`verify-build-inputs.sh` segnala Weaver assente, il device può comunque provare
+la derivazione delle chiavi via Gatekeeper; verificare il log `recovery.log` in
+caso di errore.
 
 ## 6. Troubleshooting
 

@@ -314,6 +314,10 @@ copy_glob_optional "$vendor_src/mitee/ta/*.ta" \
     "${DEVICE_DIR}/proprietary/vendor/mitee/ta" 0644
 copy_glob_optional "$root/files/odm/mitee/ta/*.ta" \
     "${DEVICE_DIR}/proprietary/odm/mitee/ta" 0644
+# MiFace is a ~29 MiB TEE face-unlock TA. Recovery never starts the face HAL,
+# and the TA container is almost incompressible, so keep it out of the device
+# tree instead of packing it into the recovery fragment.
+rm -f "${DEVICE_DIR}/proprietary/odm/mitee/ta/a3ba6512-6e0e-4065-93165e4a7d04ca08.ta"
 copy_glob_optional "$vendor_src/firmware/aw8697_*.bin" \
     "${DEVICE_DIR}/proprietary/vendor/firmware" 0644
 

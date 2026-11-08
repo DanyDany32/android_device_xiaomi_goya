@@ -84,6 +84,16 @@ for library in "${DEVICE_DIR}/proprietary/vendor/lib64/"*.so; do
         "recovery/root/vendor/lib64/$(basename -- "$library")"
 done
 
+# MiFace is a ~29 MiB TEE face-unlock TA. Recovery never starts the face HAL,
+# and the TA container is almost incompressible, so packing it would push the
+# combined vendor_boot ramdisk over the 100 MB budget.
+is_recovery_ta_excluded() {
+    case "$(basename -- "$1")" in
+        a3ba6512-6e0e-4065-93165e4a7d04ca08.ta) return 0 ;;
+    esac
+    return 1
+}
+
 for ta in "${DEVICE_DIR}/proprietary/vendor/mitee/ta/"*.ta; do
     [ -f "$ta" ] || continue
     add_copy "proprietary/vendor/mitee/ta/$(basename -- "$ta")" \
@@ -91,6 +101,9 @@ for ta in "${DEVICE_DIR}/proprietary/vendor/mitee/ta/"*.ta; do
 done
 for ta in "${DEVICE_DIR}/proprietary/odm/mitee/ta/"*.ta; do
     [ -f "$ta" ] || continue
+    if is_recovery_ta_excluded "$ta"; then
+        continue
+    fi
     add_copy "proprietary/odm/mitee/ta/$(basename -- "$ta")" \
         "recovery/root/odm/mitee/ta/$(basename -- "$ta")"
 done
