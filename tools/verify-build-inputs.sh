@@ -16,6 +16,14 @@ DEVICE_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 REQUIRE_BLOBS=0
 PYTHON="${PYTHON:-python3}"
 
+MAGISK_ADDON_ENV="${DEVICE_DIR}/tools/magisk-addon.env"
+if [ ! -f "$MAGISK_ADDON_ENV" ]; then
+    echo "ERROR: missing Magisk addon metadata: $MAGISK_ADDON_ENV" >&2
+    exit 1
+fi
+# shellcheck disable=SC1090
+. "$MAGISK_ADDON_ENV"
+
 while [ "$#" -gt 0 ]; do
     case "$1" in
         --require-blobs)
@@ -103,9 +111,12 @@ for relative in \
     fox_callback.sh \
     .gitignore \
     prebuilt/README.md \
+    prebuilt/magisk/README.md \
     prebuilt/dtb/mt6899-goya.dtb \
     prebuilt/health/android.hardware.health-service.example_recovery \
     prebuilt/vendor-boot/header.json \
+    tools/magisk-addon.env \
+    recovery/root/system/bin/magisk-addon-setup.sh \
     prebuilt/vendor-boot/bootconfig \
     patches/orangefox-build-make.patch \
     patches/vold-fbe-secdisc-fallback.patch \
@@ -139,6 +150,10 @@ for relative in \
     check_file "${DEVICE_DIR}/${relative}"
 done
 
+check_file "${DEVICE_DIR}/prebuilt/magisk/${MAGISK_ADDON_APK_NAME}"
+check_sha256 "${DEVICE_DIR}/prebuilt/magisk/${MAGISK_ADDON_APK_NAME}" \
+    "$MAGISK_ADDON_SHA256"
+
 for script in \
     "${DEVICE_DIR}/build-lowmem.sh" \
     "${DEVICE_DIR}/fox_callback.sh" \
@@ -148,7 +163,8 @@ for script in \
     "${DEVICE_DIR}/tools/generate-blobs-mk.sh" \
     "${DEVICE_DIR}/tools/import-dump.sh" \
     "${DEVICE_DIR}/tools/prepare-stock-vendor-boot.sh" \
-    "${DEVICE_DIR}/tools/verify-build-inputs.sh"; do
+    "${DEVICE_DIR}/tools/verify-build-inputs.sh" \
+    "${DEVICE_DIR}/recovery/root/system/bin/magisk-addon-setup.sh"; do
     if [ -f "$script" ]; then
         bash -n "$script" || fail "shell syntax check failed: $script"
         [ -x "$script" ] || warn "script is not executable (fix with chmod +x): $script"
@@ -181,6 +197,13 @@ check_absent "${DEVICE_DIR}/BoardConfig.mk" "TW_NO_SCREEN_BLANK" "recovery must 
 check_contains "${DEVICE_DIR}/fox_goya.mk" "OF_USE_AIDL_BOOT_CONTROL := 1" "AIDL BootControl is not selected"
 check_contains "${DEVICE_DIR}/fox_goya.mk" "TW_DEFAULT_LANGUAGE := it_IT" "Italian default language is missing"
 check_contains "${DEVICE_DIR}/fox_goya.mk" "OF_SCREEN_H := 2340" "screen height override is missing"
+check_contains "${DEVICE_DIR}/fox_goya.mk" "FOX_MOVE_MAGISK_INSTALLER_TO_RAMDISK := 1" "Magisk addon is not pointed at /FFiles/OF_Magisk"
+check_contains "${DEVICE_DIR}/device.mk" "magisk-addon-setup.sh" "Magisk addon early-boot helper is not packaged"
+check_contains "${DEVICE_DIR}/recovery/root/init.recovery.mt6899.rc" "magisk-addon-setup.sh" "Magisk addon early-boot helper is not started"
+check_contains "${DEVICE_DIR}/fox_callback.sh" "OF_Magisk.conf" "Magisk addon metadata is not written into the ramdisk"
+check_contains "${DEVICE_DIR}/tools/build-system-compatible-vendor-boot.sh" "embed_magisk_addon" "repacker does not embed the Magisk APK"
+check_contains "${DEVICE_DIR}/tools/magisk-addon.env" "MAGISK_ADDON_OFFSET=80003072" "Magisk addon offset is not the documented page-aligned value"
+check_contains "${DEVICE_DIR}/prebuilt/magisk/README.md" "e0d32d2123532860f97123d927b1bb86c4e08e6fd8a48bfc6b5bee0afae9ebd5" "Magisk APK hash is not documented"
 
 # Product / device configuration
 check_contains "${DEVICE_DIR}/device.mk" "PRODUCT_SHIPPING_API_LEVEL := 34" "OrangeFox 14.1 must ship API 34"

@@ -250,12 +250,31 @@ symlink `unzip`/`zipinfo` e `sbin/zip`) e `magiskboot`
 Magisk e la manipolazione delle immagini di boot. Rimuove `gnutar`, `gnused` e
 `scp.ko`, che non servono in recovery e occupano spazio prezioso: `tar` e `sed`
 restano disponibili via toybox. `magiskboot` costa circa 750 KB compressi e
-lascia ~342 KB di margine sotto il limite di 64.000.000 byte del vendor
+lascia ~333 KB di margine sotto il limite di 64.000.000 byte del vendor
 ramdisk; per questo va verificato il boot sul dispositivo dopo ogni modifica.
 
+### Addon Magisk
+
+L'addon Fox Addons → Magisk non può contare sullo ZIP di installazione
+OrangeFox, perché la release si flasha come immagine `vendor_boot` completa.
+La build incorpora quindi l'APK ufficiale **Magisk v30.7** (SHA-256
+`e0d32d2123532860f97123d927b1bb86c4e08e6fd8a48bfc6b5bee0afae9ebd5`) nella coda
+non usata della partizione `vendor_boot` (offset `80.003.072`, allineato a
+4096 byte), fuori dal ramdisk da 64 MB. All'avvio
+`recovery/root/system/bin/magisk-addon-setup.sh` copia l'APK in
+`/FFiles/OF_Magisk/Magisk.zip`, cioè il percorso usato dall'addon quando
+`FOX_MOVE_MAGISK_INSTALLER_TO_RAMDISK` è attivo. L'APK è coperto dall'hash AVB
+e l'immagine resta di 117.440.512 byte; il ramdisk recovery resta a
+63.666.927 byte, quindi il margine di boot non cambia.
+
+Per aggiornare Magisk: sostituire `prebuilt/magisk/Magisk-v30.7.apk`,
+aggiornare `prebuilt/magisk/README.md` e `tools/magisk-addon.env` (nome, SHA-256
+e versione mostrata), quindi ricostruire e ritestare l'addon sul dispositivo.
+Non inserire l'APK nel ramdisk: 11,6 MB non entrano nel limite di 64 MB.
+
 Validazione sul dispositivo: MTP espone `/data/media/0`, `zip`, `unzip` e
-`zipinfo` funzionano, e il boot Android successivo arriva a
-`sys.boot_completed=1`.
+`zipinfo` funzionano, l'addon Magisk trova `Magisk.zip` e installa Magisk, e il
+boot Android successivo arriva a `sys.boot_completed=1`.
 
 ## 6. Troubleshooting
 
@@ -269,6 +288,7 @@ Validazione sul dispositivo: MTP espone `/data/media/0`, `zip`, `unzip` e
 | KeyMint/Gatekeeper/health non partono (`__libcpp_verbose_abort`) | manca `vendor/lib64/libc++.so` nel frammento recovery: verificare la regola in `proprietary/blobs.mk` e l'import in `tools/import-dump.sh` |
 | Fastbootd non cambia slot | servizio AIDL BootControl stock assente dal platform fragment |
 | Build senza moduli display | `prebuilt/vendor-boot/` non importato |
+| Addon Magisk: "Il file non esiste" | `/FFiles/OF_Magisk/Magisk.zip` non creato: verificare `magisk-addon-setup.sh`, l'offset in `tools/magisk-addon.env` e che l'immagine flashata sia quella con l'APK nella coda |
 
 Eseguire sempre il preflight prima della build:
 

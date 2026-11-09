@@ -705,6 +705,7 @@ jobs:
           - Firmware: ${FIRMWARE_FINGERPRINT}
           - GitHub run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
           - Require blobs: ${REQUIRE_BLOBS:-false}
+          - Magisk addon: v30.7 APK embedded in the vendor_boot partition tail and copied to /FFiles/OF_Magisk/Magisk.zip at boot
 
           Flash only the standard image first. Keep the stock vendor_boot for rollback.
           EOF
@@ -793,6 +794,7 @@ jobs:
           - Device-tree commit: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA}
           - OrangeFox branch: ${ORANGEFOX_BRANCH}
           - GitHub run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
+          - Magisk addon: v30.7 APK embedded in the vendor_boot partition tail and copied to /FFiles/OF_Magisk/Magisk.zip at boot
 
           Keep the stock vendor_boot image. Flash the standard image first; use the
           disable-avb variant only when Android rejects AVB state or logical-partition

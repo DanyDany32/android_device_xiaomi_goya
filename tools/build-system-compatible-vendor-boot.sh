@@ -15,6 +15,15 @@ TOP_DIR="$(cd -- "${DEVICE_DIR}/../../.." && pwd -P)"
 PRODUCT_OUT="${1:-${OUT_DIR:-${TOP_DIR}/out}/target/product/goya}"
 PREBUILT_DIR="${DEVICE_DIR}/prebuilt/vendor-boot"
 STOCK_PLATFORM_JSON="${PREBUILT_DIR}/header.json"
+MAGISK_ADDON_ENV="${DEVICE_DIR}/tools/magisk-addon.env"
+
+if [ ! -f "$MAGISK_ADDON_ENV" ]; then
+    echo "missing Magisk addon metadata: $MAGISK_ADDON_ENV" >&2
+    exit 1
+fi
+# shellcheck disable=SC1090
+. "$MAGISK_ADDON_ENV"
+MAGISK_ADDON_APK="${DEVICE_DIR}/prebuilt/magisk/${MAGISK_ADDON_APK_NAME}"
 
 OUTPUT_IMAGE="${2:-${PRODUCT_OUT}/OrangeFox-R14.1-Unofficial-goya-system-compatible.img}"
 DISABLE_AVB_OUTPUT_IMAGE="${3:-${PRODUCT_OUT}/OrangeFox-R14.1-Unofficial-goya-disable-avb-system-compatible.img}"
@@ -29,13 +38,34 @@ UNPACK_BOOTIMG="${DEVICE_DIR}/tools/unpack-vendor-boot.py"
 DTB_PATCHER="${DEVICE_DIR}/tools/patch-vendor-boot-dtb.py"
 
 for file in "$STOCK_DTB" "$RECOVERY_LZ4" "$MKBOOTIMG" "$MKBOOTFS" \
-            "$AVBTOOL" "$UNPACK_BOOTIMG" "$DTB_PATCHER"; do
+            "$AVBTOOL" "$UNPACK_BOOTIMG" "$DTB_PATCHER" "$MAGISK_ADDON_APK"; do
     if [ ! -f "$file" ]; then
         echo "missing required build input: $file" >&2
         echo "run tools/prepare-stock-vendor-boot.sh with the stock vendor_boot.img first" >&2
         exit 1
     fi
 done
+
+case "$MAGISK_ADDON_OFFSET" in
+    ''|*[!0-9]*)
+        echo "invalid MAGISK_ADDON_OFFSET: $MAGISK_ADDON_OFFSET" >&2
+        exit 1
+        ;;
+esac
+if [ $((MAGISK_ADDON_OFFSET % 4096)) -ne 0 ]; then
+    echo "MAGISK_ADDON_OFFSET must be page aligned: $MAGISK_ADDON_OFFSET" >&2
+    exit 1
+fi
+magisk_apk_size="$(stat -c %s "$MAGISK_ADDON_APK")"
+magisk_apk_sha="$(sha256sum "$MAGISK_ADDON_APK" | awk '{print $1}')"
+if [ "$magisk_apk_sha" != "$MAGISK_ADDON_SHA256" ]; then
+    echo "unexpected SHA-256 for $MAGISK_ADDON_APK: $magisk_apk_sha" >&2
+    exit 1
+fi
+if [ $((MAGISK_ADDON_OFFSET + magisk_apk_size)) -ge 117440512 ]; then
+    echo "Magisk addon does not fit in the vendor_boot partition" >&2
+    exit 1
+fi
 
 # The AOSP host lz4 is always built together with mkbootimg, but allow a
 # distribution lz4 as a fallback so the repack can also run outside a full
@@ -438,6 +468,46 @@ pack_ramdisk() {
     "$LZ4" -l -12 --favor-decSpeed -f "$cpio" "$lz4" >/dev/null
 }
 
+# The 64 MB vendor ramdisk is already almost full, so the Magisk installer APK
+# lives in the unused tail of the 112 MiB vendor_boot partition. Appending it
+# before avbtool keeps the data inside the AVB hash; the bootloader reads only
+# the ramdisk fragments described by the header and ignores the tail.
+embed_magisk_addon() {
+    local image="$1" apk="$2" offset="$3" size current actual
+
+    size="$(stat -c %s "$apk")"
+    current="$(stat -c %s "$image")"
+    if [ "$current" -gt "$offset" ]; then
+        echo "vendor_boot image is $current bytes; cannot embed Magisk APK at $offset" >&2
+        exit 1
+    fi
+    truncate -s "$offset" "$image"
+    cat "$apk" >> "$image"
+
+    actual="$(dd if="$image" bs=4096 skip=$((offset / 4096)) \
+        count=$(( (size + 4095) / 4096 )) 2>/dev/null |
+        head -c "$size" | sha256sum | awk '{print $1}')"
+    if [ "$actual" != "$MAGISK_ADDON_SHA256" ]; then
+        echo "embedded Magisk APK hash mismatch: $actual" >&2
+        exit 1
+    fi
+}
+
+verify_embedded_magisk_addon() {
+    local image="$1" label="$2" size actual
+
+    size="$(stat -c %s "$MAGISK_ADDON_APK")"
+    actual="$(dd if="$image" bs=4096 skip=$((MAGISK_ADDON_OFFSET / 4096)) \
+        count=$(( (size + 4095) / 4096 )) 2>/dev/null |
+        head -c "$size" | sha256sum | awk '{print $1}')"
+    if [ "$actual" != "$MAGISK_ADDON_SHA256" ]; then
+        echo "${label}: embedded Magisk APK hash mismatch: $actual" >&2
+        exit 1
+    fi
+    printf '%s\n' "${label}: Magisk addon APK verified at offset ${MAGISK_ADDON_OFFSET}" \
+        "(${size} bytes, SHA-256 ${MAGISK_ADDON_SHA256})"
+}
+
 # The goya bootloader accepted the R6 vendor ramdisk at 62,484,458 bytes but
 # bootlooped at 64,734,211 bytes. Keep a hard engineering cap at 64,000,000
 # bytes for the combined platform + recovery vendor ramdisk, which leaves a
@@ -591,6 +661,7 @@ build_vendor_boot() {
     fi
     mkbootimg_args+=(--vendor_boot "$image")
     "$MKBOOTIMG" "${mkbootimg_args[@]}"
+    embed_magisk_addon "$image" "$MAGISK_ADDON_APK" "$MAGISK_ADDON_OFFSET"
     "$AVBTOOL" add_hash_footer \
         --image "$image" \
         --partition_size 117440512 \
@@ -694,9 +765,13 @@ for property in \
     fi
 done
 
+test "$(stat -c %s "$OUTPUT_IMAGE")" = 117440512
 test "$(stat -c %s "$DISABLE_AVB_OUTPUT_IMAGE")" = 117440512
 cp -fp "$DISABLE_AVB_OUTPUT_IMAGE" "$disable_avb_verify_image"
+"$AVBTOOL" verify_image --image "$OUTPUT_IMAGE"
 "$AVBTOOL" verify_image --image "$disable_avb_verify_image"
+verify_embedded_magisk_addon "$OUTPUT_IMAGE" standard
+verify_embedded_magisk_addon "$DISABLE_AVB_OUTPUT_IMAGE" disable-avb
 
 # OrangeFox creates these names before this post-build step. Replace both
 # whole-image outputs so an ordinary vendorbootimage build cannot leave a

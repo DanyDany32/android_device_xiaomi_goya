@@ -33,3 +33,9 @@ OF_LOAD_DEFAULT_LANGUAGE_BEFORE_DECRYPT := 1
 # AIDL BootControl is provided by the stock MediaTek service retained from the
 # platform ramdisk fragment. See recovery/root/init.recovery.bootctl.rc.
 OF_USE_AIDL_BOOT_CONTROL := 1
+
+# The release is flashed as a raw vendor_boot image, so the OrangeFox install
+# ZIP never runs and cannot copy Magisk.zip to /sdcard/Fox/FoxFiles. Point the
+# addon at /FFiles/OF_Magisk instead; the early-boot helper extracts the APK
+# from the vendor_boot partition tail (see tools/magisk-addon.env).
+FOX_MOVE_MAGISK_INSTALLER_TO_RAMDISK := 1

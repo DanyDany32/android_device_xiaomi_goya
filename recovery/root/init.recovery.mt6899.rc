@@ -107,6 +107,10 @@ on init
 # loader is idempotent because first-stage init may already have loaded some
 # of the platform dependencies from the stock platform fragment.
 on early-boot
+    # The Magisk installer APK is stored in the vendor_boot partition tail
+    # because the 64 MB vendor ramdisk has no room for it. Copy it to the path
+    # used by the OrangeFox addon before the recovery UI starts.
+    exec - root root -- /system/bin/magisk-addon-setup.sh
     exec_start goya-touch-loader
     start goya-touchfeature
     exec_start goya-touch-wait

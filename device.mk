@@ -85,6 +85,7 @@ PRODUCT_COPY_FILES += \
     $(DEVICE_PATH)/recovery/root/system/bin/load-touch-modules.sh:recovery/root/system/bin/load-touch-modules.sh \
     $(DEVICE_PATH)/recovery/root/system/bin/wait-touch-service.sh:recovery/root/system/bin/wait-touch-service.sh \
     $(DEVICE_PATH)/recovery/root/system/bin/load-haptics-module.sh:recovery/root/system/bin/load-haptics-module.sh \
+    $(DEVICE_PATH)/recovery/root/system/bin/magisk-addon-setup.sh:recovery/root/system/bin/magisk-addon-setup.sh \
     $(DEVICE_PATH)/recovery/root/system/etc/recovery.fstab:recovery/root/system/etc/recovery.fstab \
     $(DEVICE_PATH)/recovery/root/system/etc/twrp.flags:recovery/root/system/etc/twrp.flags \
     $(DEVICE_PATH)/recovery/root/first_stage_ramdisk/fstab.mt6899:recovery/root/first_stage_ramdisk/fstab.mt6899

@@ -246,12 +246,47 @@ if [ -d "$terminfo" ]; then
     trap - EXIT
 fi
 
+# The Magisk installer APK is stored in the unused tail of the vendor_boot
+# partition, not in the 64 MB vendor ramdisk. Record its location and hash so
+# the early-boot helper can copy it to /FFiles/OF_Magisk/Magisk.zip.
+magisk_env="$device_dir/tools/magisk-addon.env"
+if [ ! -f "$magisk_env" ]; then
+    echo "ERROR: missing Magisk addon metadata: $magisk_env" >&2
+    exit 1
+fi
+# shellcheck disable=SC1090
+. "$magisk_env"
+magisk_apk="$device_dir/prebuilt/magisk/$MAGISK_ADDON_APK_NAME"
+if [ ! -f "$magisk_apk" ]; then
+    echo "ERROR: missing Magisk addon APK: $magisk_apk" >&2
+    exit 1
+fi
+magisk_sha="$(sha256sum "$magisk_apk" | awk '{print $1}')"
+if [ "$magisk_sha" != "$MAGISK_ADDON_SHA256" ]; then
+    echo "ERROR: unexpected SHA-256 for $magisk_apk: $magisk_sha" >&2
+    exit 1
+fi
+mkdir -p "$ramdisk/FFiles"
+cat > "$ramdisk/FFiles/OF_Magisk.conf" <<EOF
+offset=$MAGISK_ADDON_OFFSET
+size=$(stat -c %s "$magisk_apk")
+sha256=$MAGISK_ADDON_SHA256
+EOF
+
+# OrangeFox's UI displays a hard-coded Magisk version in twres/ui.xml. Keep it
+# aligned with the installer that is actually bundled.
+if [ -f "$ramdisk/twres/ui.xml" ]; then
+    sed -i "s/name=\"magisk_ver\" value=\"[^\"]*\"/name=\"magisk_ver\" value=\"$MAGISK_ADDON_VERSION\"/" \
+        "$ramdisk/twres/ui.xml"
+fi
+
 # Recovery helper scripts and proprietary binaries must be executable even
 # when PRODUCT_COPY_FILES preserved a host-side 0644 mode.
 for helper in \
     load-touch-modules.sh \
     wait-touch-service.sh \
     load-haptics-module.sh \
+    magisk-addon-setup.sh \
     android.hardware.health-service.example_recovery \
     vendor.xiaomi.hw.touchfeature-service-recovery; do
     if [ -f "$ramdisk/system/bin/$helper" ]; then
