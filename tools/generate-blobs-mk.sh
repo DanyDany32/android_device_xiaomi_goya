@@ -27,11 +27,14 @@ add_copy() {
     copy_entries+=("    \$(DEVICE_PATH)/${relative_source}:${destination}")
 }
 
+# scp.ko is intentionally not packed: the platform fragment already loads the
+# MTK mailbox/IPI dependencies and load-touch-modules.sh treats SCP as
+# optional. Dropping it keeps the vendor ramdisk inside the 64,000,000-byte
+# bootloader limit.
 for module in \
     xiaomi_touch_goya.ko \
     nt38771_touch_goya.ko \
-    si_haptic.ko \
-    scp.ko; do
+    si_haptic.ko; do
     add_copy "prebuilt/modules/${module}" "recovery/root/lib/modules/${module}"
 done
 
@@ -70,6 +73,17 @@ for manifest in "${DEVICE_DIR}/proprietary/vendor/etc/vintf/manifest/"*.xml; do
         "recovery/root/vendor/etc/vintf/manifest/$(basename -- "$manifest")"
 done
 
+# servicemanager reads the merged /vendor/manifest.xml and /system/manifest.xml,
+# not only the per-service fragments above. Without them the Stage 2 HALs never
+# register and the recovery UI waits forever on keystore2 after the splash.
+# These files are recovery configuration, not stock partition blobs, so they
+# live under recovery/vintf/ and are copied only when the KeyMint service is
+# present (a Stage 1 build keeps its previous behaviour).
+if [ -f "${DEVICE_DIR}/proprietary/vendor/bin/hw/android.hardware.security.keymint@3.0-service.mitee" ]; then
+    add_copy "recovery/vintf/vendor-manifest.xml" "recovery/root/vendor/manifest.xml"
+    add_copy "recovery/vintf/system-manifest.xml" "recovery/root/system/manifest.xml"
+fi
+
 add_copy "proprietary/vendor/bin/tee-supplicant" \
     "recovery/root/vendor/bin/tee-supplicant"
 for binary in "${DEVICE_DIR}/proprietary/vendor/bin/hw/"*; do
@@ -84,28 +98,29 @@ for library in "${DEVICE_DIR}/proprietary/vendor/lib64/"*.so; do
         "recovery/root/vendor/lib64/$(basename -- "$library")"
 done
 
-# MiFace is a ~29 MiB TEE face-unlock TA. Recovery never starts the face HAL,
-# and the TA container is almost incompressible, so packing it would push the
-# combined vendor_boot ramdisk over the 100 MB budget.
-is_recovery_ta_excluded() {
+# Only two TEE TAs are needed for Stage 2 FBE decryption:
+#   dba51a17-...  AndroidKeymaster (KeyMint / secure deletion secret)
+#   4d573443-...  Gatekeeper
+# Weaver is implemented by the NXP eSE service, not by a TA. The remaining
+# vendor/ODM TAs (including the ~29 MiB MiFace TA) are unused by recovery and
+# their containers are almost incompressible; packing them pushed the
+# vendor ramdisk over the bootloader limit.
+is_recovery_ta_required() {
     case "$(basename -- "$1")" in
-        a3ba6512-6e0e-4065-93165e4a7d04ca08.ta) return 0 ;;
+        dba51a17-0563-11e7-93b16fa7b0071a51.ta|4d573443-6a56-4272-ac6f2425af9ef9bb.ta)
+            return 0
+            ;;
     esac
     return 1
 }
 
 for ta in "${DEVICE_DIR}/proprietary/vendor/mitee/ta/"*.ta; do
     [ -f "$ta" ] || continue
-    add_copy "proprietary/vendor/mitee/ta/$(basename -- "$ta")" \
-        "recovery/root/vendor/mitee/ta/$(basename -- "$ta")"
-done
-for ta in "${DEVICE_DIR}/proprietary/odm/mitee/ta/"*.ta; do
-    [ -f "$ta" ] || continue
-    if is_recovery_ta_excluded "$ta"; then
+    if ! is_recovery_ta_required "$ta"; then
         continue
     fi
-    add_copy "proprietary/odm/mitee/ta/$(basename -- "$ta")" \
-        "recovery/root/odm/mitee/ta/$(basename -- "$ta")"
+    add_copy "proprietary/vendor/mitee/ta/$(basename -- "$ta")" \
+        "recovery/root/vendor/mitee/ta/$(basename -- "$ta")"
 done
 
 install -d "${DEVICE_DIR}/proprietary"

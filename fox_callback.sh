@@ -40,7 +40,7 @@ if [ -d "$ramdisk/lib/modules" ]; then
     find "$ramdisk/lib/modules" -maxdepth 1 -type f -name '*.ko' -print0 |
         while IFS= read -r -d '' module; do
             case "$(basename "$module")" in
-                xiaomi_touch_goya.ko|nt38771_touch_goya.ko|si_haptic.ko|scp.ko)
+                xiaomi_touch_goya.ko|nt38771_touch_goya.ko|si_haptic.ko)
                     ;;
                 *)
                     rm -f "$module"
@@ -71,6 +71,27 @@ if [ -s "$stock_recovery_modules" ]; then
         "$ramdisk/lib/modules/modules.load.recovery"
 fi
 
+# The pinned OrangeFox revision's generated init.rc has no MTP gadget. R6 used
+# a local template with the MTP function and the two-function (MTP+ADB)
+# configfs layout. Replace only the known generated revision; if OrangeFox is
+# updated the build stops here instead of silently losing MTP again.
+init_rc="$ramdisk/system/etc/init/hw/init.rc"
+init_rc_mtp="$device_dir/recovery/init.rc.mtp"
+if [ -f "$init_rc" ] && ! grep -qF -- 'functions/ffs.mtp' "$init_rc"; then
+    if [ ! -f "$init_rc_mtp" ]; then
+        echo "ERROR: MTP init.rc template is missing: $init_rc_mtp" >&2
+        exit 1
+    fi
+    init_rc_sha="$(sha256sum "$init_rc" | awk '{print $1}')"
+    if [ "$init_rc_sha" != "f8c0918ab6bb4ffe54cab82ab238b59d9a6f9036da4f5437efe0630c12cf6722" ]; then
+        echo "ERROR: unsupported OrangeFox init.rc revision: $init_rc_sha" >&2
+        echo "       update recovery/init.rc.mtp before building" >&2
+        exit 1
+    fi
+    echo "-- Restoring the MTP gadget in the recovery init.rc"
+    cp -fp "$init_rc_mtp" "$init_rc"
+fi
+
 # fastbootd waits for android.hardware.health.IHealth/default before it opens
 # /dev/usb-ffs/fastboot. The stock rc declares the service with class hal and
 # the hal_health_default SELinux domain, neither of which exists in this
@@ -97,6 +118,25 @@ rm -f \
     "$ramdisk/system/lib64/liblpdump_interface-cpp.so" \
     "$ramdisk/system/lib64/libprotobuf-cpp-full.so" \
     "$ramdisk/system/lib64/libsnapshot.so"
+
+# Keep the ZIP stack (zip + ziptool with unzip/zipinfo symlinks): recovery
+# backups and ZIP installation need it. Drop the large optional GNU/magisk
+# tools; toybox already provides tar and sed, and the 64,000,000-byte vendor
+# ramdisk leaves no room for the rest. Remove both the target and its /sbin
+# symlink so the UI never sees a dangling command.
+rm -f \
+    "$ramdisk/system/bin/gnutar" \
+    "$ramdisk/system/bin/gnused" \
+    "$ramdisk/system/bin/magiskboot" \
+    "$ramdisk/sbin/gnutar" \
+    "$ramdisk/sbin/gnused" \
+    "$ramdisk/sbin/magiskboot"
+if [ ! -f "$ramdisk/system/bin/ziptool" ]; then
+    rm -f "$ramdisk/system/bin/unzip" "$ramdisk/system/bin/zipinfo"
+fi
+if [ ! -f "$ramdisk/system/bin/zip" ]; then
+    rm -f "$ramdisk/sbin/zip"
+fi
 
 # Mini debug sections are already compressed data and are not used on-device.
 objcopy_bin="prebuilts/clang/host/linux-x86/clang-r510928/bin/llvm-objcopy"

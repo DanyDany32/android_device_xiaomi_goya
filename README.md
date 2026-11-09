@@ -19,8 +19,8 @@ composta da:
 
 | Fase | Contenuto | Stato |
 | --- | --- | --- |
-| Stage 1 | boot, display, touch, ADB, MTP, fastbootd | input importati dal firmware OS3.0.311.0 |
-| Stage 2 | decrypt FBE/Metadata con KeyMint/Gatekeeper/Weaver e TouchReport | blob TEE e dipendenze importati; decrypt FBE validato sul dispositivo (protector secdis) |
+| Stage 1 | boot, display, touch, ADB, MTP, fastbootd, ZIP | input importati dal firmware OS3.0.311.0 |
+| Stage 2 | decrypt FBE/Metadata con KeyMint/Gatekeeper/Weaver, TouchReport, MTP e ZIP | blob TEE e dipendenze importati; decrypt FBE, MTP e ZIP validati sul dispositivo (protector secdis) |
 
 Un albero senza i servizi Stage 2 (health-aidl, KeyMint, Gatekeeper) produce
 una immagine Stage 1 senza decrypt. Quando questi servizi sono presenti, il
@@ -80,8 +80,9 @@ Lo script legge:
 - `vendor_boot` dello slot corrente (112 MiB);
 - i quattro moduli `vendor_dlkm`;
 - HAL touch, librerie, firmware e config Novatek;
-- KeyMint/Gatekeeper/Weaver MiTEE, `tee-supplicant`, librerie TEE e TA
-  (il TA MiFace da ~29 MiB è escluso: recovery non avvia la HAL face);
+- KeyMint/Gatekeeper/Weaver MiTEE, `tee-supplicant`, librerie TEE e solo i
+  due TA necessari (AndroidKeymaster e Gatekeeper; gli altri TA, incluso
+  MiFace da ~29 MiB, sono esclusi);
 - firmware haptics AW8697.
 
 Viene prodotto anche `meta/build-info.txt` con le proprietà del firmware, utile
@@ -162,6 +163,7 @@ Output in `out/target/product/goya/`:
 - relativi `.sha256`
 
 Entrambe le immagini sono da 117440512 byte e hanno un footer AVB valido.
+Il repack rifiuta un ramdisk combinato superiore a 64.000.000 byte.
 
 ## 4. Flash
 
@@ -180,8 +182,10 @@ adb pull /sdcard/vendor_boot_stock.img
 Verificare lo slot corrente e flashare solo quello:
 
 ```bash
+slot="$(adb shell getprop ro.boot.slot_suffix | tr -d '\r')"
+adb reboot bootloader
 fastboot getvar current-slot
-fastboot flash vendor_boot OrangeFox-R14.1-Unofficial-goya-system-compatible.img
+fastboot flash "vendor_boot${slot}" OrangeFox-R14.1-Unofficial-goya-system-compatible.img
 fastboot reboot recovery
 ```
 
@@ -194,7 +198,7 @@ Note:
 - l'immagine `disable-avb` serve solo se Android mostra ancora lo stato
   `locked` o se il first-stage `fs_mgr` rifiuta i logical partition. Non
   sblocca il bootloader e non modifica il vbmeta del dispositivo;
-- per tornare indietro: `fastboot flash vendor_boot vendor_boot_stock.img`.
+- per tornare indietro: `fastboot flash "vendor_boot${slot}" vendor_boot_stock.img`.
 
 ## 5. Decrypt FBE (Stage 2)
 
@@ -209,10 +213,13 @@ Il device tree include già:
   binari Android 16 di KeyMint/Gatekeeper/health sono BIND_NOW e richiedono
   `std::__libcpp_verbose_abort`, che la libc++ di OrangeFox non esporta.
 
-Per completare il decrypt servono i TA MiTEE e le librerie TEE importati dal
-dump. Il TA MiFace (~29 MiB, face unlock TEE) viene invece scartato: recovery
-non avvia la HAL face e il container è quasi incomprimibile, quindi includerlo
-porterebbe il ramdisk combinato oltre il budget di 100 MB.
+Per completare il decrypt servono solo due TA MiTEE, AndroidKeymaster
+(`dba51a17-...`) e Gatekeeper (`4d573443-...`); Weaver usa il servizio NXP eSE,
+non un TA. Gli altri TA (incluso MiFace da ~29 MiB) vengono scartati: recovery
+non li usa e i container sono quasi incomprimibili. Il ramdisk combinato ha un
+limite fisico di 64.000.000 byte: R6 (62.484.458 byte) è bootabile, mentre
+64.734.211 byte mandano il bootloader in bootloop. La build si ferma sopra
+64.000.000 byte.
 
 Il decrypt FBE è stato validato sul dispositivo. Il firmware stock mantiene,
 accanto al protector Weaver, un secondo protector LSKF basato su
@@ -229,6 +236,21 @@ Verifica eseguita: log `using secdis to decrypt spblob` → `GateKeeper status o
 accessibili. Se `verify-build-inputs.sh` segnala Weaver assente, il device può
 comunque usare il protector secdis; verificare il log `recovery.log` in caso di
 errore.
+
+### MTP e ZIP
+
+`fox_callback.sh` sostituisce l'`init.rc` generato dalla revisione OrangeFox
+pinnata con `recovery/init.rc.mtp` (protetto da un controllo SHA-256), perché
+quel file non dichiara il gadget MTP. Il template aggiunge `ffs.mtp`, il mount
+`/dev/usb-ffs/mtp` e la configurazione `mtp,adb` con due funzioni.
+
+La build mantiene lo stack ZIP completo (`system/bin/zip`, `system/bin/ziptool`,
+symlink `unzip`/`zipinfo` e `sbin/zip`) e rimuove `gnutar`, `gnused`,
+`magiskboot` e `scp.ko`, che non servono in recovery e occupano spazio prezioso.
+
+Validazione sul dispositivo: MTP espone `/data/media/0`, `zip`, `unzip` e
+`zipinfo` funzionano, e il boot Android successivo arriva a
+`sys.boot_completed=1`.
 
 ## 6. Troubleshooting
 

@@ -118,6 +118,9 @@ for relative in \
     tools/patch-vendor-boot-dtb.py \
     tools/prepare-stock-vendor-boot.sh \
     tools/unpack-vendor-boot.py \
+    recovery/init.rc.mtp \
+    recovery/vintf/vendor-manifest.xml \
+    recovery/vintf/system-manifest.xml \
     recovery/root/init.recovery.bootctl.rc \
     recovery/root/init.recovery.keymint.rc \
     recovery/root/init.recovery.mt6899.rc \
@@ -223,6 +226,7 @@ check_contains "${DEVICE_DIR}/tools/build-system-compatible-vendor-boot.sh" "117
 check_contains "${DEVICE_DIR}/tools/build-system-compatible-vendor-boot.sh" "--dtb_offset 0x07c88000" "repacker DTB offset is wrong"
 check_contains "${DEVICE_DIR}/tools/build-system-compatible-vendor-boot.sh" "--ramdisk_type recovery" "repacker does not add the recovery fragment"
 check_contains "${DEVICE_DIR}/tools/build-system-compatible-vendor-boot.sh" "verify_platform_modules" "repacker does not validate stock platform modules"
+check_contains "${DEVICE_DIR}/tools/build-system-compatible-vendor-boot.sh" "64000000" "repacker has no 64,000,000-byte vendor ramdisk limit"
 check_contains "${DEVICE_DIR}/tools/build-system-compatible-vendor-boot.sh" "mediatek,usb-offload" "repacker does not patch the USB offload DTB property"
 check_contains "${DEVICE_DIR}/tools/patch-vendor-boot-dtb.py" "mediatek,usb-offload" "DTB patcher does not target the USB offload property"
 check_contains "${DEVICE_DIR}/tools/patch-vendor-boot-dtb.py" "--check-absent" "DTB patcher has no structural property check"
@@ -230,7 +234,14 @@ check_contains "${DEVICE_DIR}/.github/workflows/build-orangefox.yml" "--check-ab
 check_contains "${DEVICE_DIR}/.github/workflows/build-orangefox.yml" 'pattern: orangefox-goya-release-${{ github.run_id }}-${{ github.run_attempt }}' "release job does not select the uploaded artifact name exactly"
 check_contains "${DEVICE_DIR}/tools/unpack-vendor-boot.py" "VENDOR_HEADER_V4_SIZE" "vendor_boot v4 parser is missing"
 check_contains "${DEVICE_DIR}/fox_callback.sh" "vendor.xiaomi.hw.touchfeature-service-recovery" "touchfeature service is not in the UPX list"
-check_contains "${DEVICE_DIR}/fox_callback.sh" "xiaomi_touch_goya.ko|nt38771_touch_goya.ko|si_haptic.ko|scp.ko" "recovery module pruning list is missing"
+check_contains "${DEVICE_DIR}/fox_callback.sh" "xiaomi_touch_goya.ko|nt38771_touch_goya.ko|si_haptic.ko" "recovery module pruning list is missing"
+check_contains "${DEVICE_DIR}/fox_callback.sh" "recovery/init.rc.mtp" "MTP init.rc template is not wired into the recovery callback"
+check_contains "${DEVICE_DIR}/recovery/init.rc.mtp" "functions/ffs.mtp" "MTP init.rc template does not create the MTP function"
+check_contains "${DEVICE_DIR}/recovery/init.rc.mtp" "sys.usb.config=mtp,adb" "MTP init.rc template has no MTP+ADB trigger"
+check_contains "${DEVICE_DIR}/fox_callback.sh" "system/bin/gnutar" "optional tool pruning is missing"
+check_contains "${DEVICE_DIR}/fox_callback.sh" "system/bin/ziptool" "ZIP stack preservation check is missing"
+check_contains "${DEVICE_DIR}/tools/generate-blobs-mk.sh" "dba51a17-0563-11e7-93b16fa7b0071a51.ta|4d573443-6a56-4272-ac6f2425af9ef9bb.ta" "generator TA allowlist is missing"
+check_contains "${DEVICE_DIR}/tools/import-dump.sh" "libjc_keymint_transport.nxp.so" "importer does not import libjc_keymint_transport"
 check_contains "${DEVICE_DIR}/build-lowmem.sh" "vendorbootimage" "low-memory build does not target vendor_boot"
 check_contains "${DEVICE_DIR}/build-lowmem.sh" "twrp_goya-ap2a-eng" "low-memory build lunch target is wrong"
 
@@ -468,7 +479,8 @@ if [ -f "$keymint_service" ]; then
             android.hardware.secure_element-V1-ndk.so \
             android.se.omapi-V1-ndk.so \
             android.system.suspend-V1-ndk.so \
-            ese_weaver.nxp.so; do
+            ese_weaver.nxp.so \
+            libjc_keymint_transport.nxp.so; do
             require_stage2_file "${DEVICE_DIR}/proprietary/vendor/lib64/${library}" \
                 "Weaver runtime library is missing: ${library}"
         done
@@ -477,6 +489,52 @@ if [ -f "$keymint_service" ]; then
     fi
 else
     warn "KeyMint MiTEE is absent; build will produce a Stage 1 image without FBE decryption"
+fi
+
+# servicemanager reads merged manifests at fixed paths. The per-service
+# fragments alone are not enough: without these files the HALs never register
+# and recovery hangs on the splash waiting for keystore2.
+merged_vendor_manifest="${DEVICE_DIR}/recovery/vintf/vendor-manifest.xml"
+merged_system_manifest="${DEVICE_DIR}/recovery/vintf/system-manifest.xml"
+check_contains "$merged_vendor_manifest" "IKeyMintDevice/default" \
+    "merged vendor manifest does not declare KeyMint"
+check_contains "$merged_vendor_manifest" "IGatekeeper/default" \
+    "merged vendor manifest does not declare Gatekeeper"
+check_contains "$merged_vendor_manifest" "IWeaver/default" \
+    "merged vendor manifest does not declare Weaver"
+check_contains "$merged_system_manifest" "IKeystoreService/default" \
+    "merged system manifest does not declare keystore2"
+if [ -f "${DEVICE_DIR}/proprietary/blobs.mk" ] && [ -f "$keymint_service" ]; then
+    check_contains "${DEVICE_DIR}/proprietary/blobs.mk" \
+        "recovery/vintf/vendor-manifest.xml:recovery/root/vendor/manifest.xml" \
+        "merged vendor manifest is not copied into the recovery fragment"
+    check_contains "${DEVICE_DIR}/proprietary/blobs.mk" \
+        "recovery/vintf/system-manifest.xml:recovery/root/system/manifest.xml" \
+        "merged system manifest is not copied into the recovery fragment"
+    check_contains "${DEVICE_DIR}/proprietary/blobs.mk" \
+        "proprietary/vendor/lib64/libjc_keymint_transport.nxp.so:recovery/root/vendor/lib64/libjc_keymint_transport.nxp.so" \
+        "libjc_keymint_transport is not copied into the recovery fragment"
+fi
+
+# Only the Keymaster and Gatekeeper TAs are needed. Keep the allowlist in sync
+# between the importer, the generator and the generated blobs.mk.
+if [ -f "${DEVICE_DIR}/proprietary/blobs.mk" ]; then
+    for ta in "${DEVICE_DIR}/proprietary/vendor/mitee/ta/"*.ta \
+              "${DEVICE_DIR}/proprietary/odm/mitee/ta/"*.ta; do
+        [ -f "$ta" ] || continue
+        case "$(basename -- "$ta")" in
+            dba51a17-0563-11e7-93b16fa7b0071a51.ta|4d573443-6a56-4272-ac6f2425af9ef9bb.ta)
+                check_contains "${DEVICE_DIR}/proprietary/blobs.mk" "$(basename -- "$ta")" \
+                    "required TEE TA is not packed: $(basename -- "$ta")"
+                ;;
+            *)
+                check_absent "${DEVICE_DIR}/proprietary/blobs.mk" "$(basename -- "$ta")" \
+                    "unused TEE TA is still packed: $(basename -- "$ta")"
+                ;;
+        esac
+    done
+    check_absent "${DEVICE_DIR}/proprietary/blobs.mk" "scp.ko" \
+        "scp.ko must not be packed in the recovery fragment"
 fi
 
 if [ "$REQUIRE_BLOBS" -eq 1 ]; then

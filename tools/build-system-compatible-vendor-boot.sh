@@ -438,12 +438,19 @@ pack_ramdisk() {
     "$LZ4" -l -12 --favor-decSpeed -f "$cpio" "$lz4" >/dev/null
 }
 
+# The goya bootloader accepted the R6 vendor ramdisk at 62,484,458 bytes but
+# bootlooped at 64,734,211 bytes. Keep a hard engineering cap at 64,000,000
+# bytes for the combined platform + recovery vendor ramdisk, which leaves a
+# small margin for future metadata changes.
+MAX_VENDOR_RAMDISK_SIZE=64000000
+
 check_combined_ramdisk_size() {
     local label="$1" platform_lz4="$2" recovery_lz4="$3" total
 
     total=$(( $(stat -c %s "$platform_lz4") + $(stat -c %s "$recovery_lz4") ))
-    if [ "$total" -ge 100000000 ]; then
-        echo "${label} combined vendor ramdisk is $total bytes; expected less than 100000000" >&2
+    if [ "$total" -gt "$MAX_VENDOR_RAMDISK_SIZE" ]; then
+        echo "${label} combined vendor ramdisk is $total bytes;" >&2
+        echo "limit is ${MAX_VENDOR_RAMDISK_SIZE} bytes (64,000,000)" >&2
         exit 1
     fi
     printf '%s\n' "$total"

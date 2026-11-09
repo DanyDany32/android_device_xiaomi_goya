@@ -187,6 +187,7 @@ for pattern in \
     '/vendor/lib64/android.se.omapi-*.so' \
     '/vendor/lib64/android.system.suspend-*.so' \
     '/vendor/lib64/ese_weaver*.so' \
+    '/vendor/lib64/libjc_keymint_transport.nxp.so' \
     '/vendor/lib64/lib_android_keymaster*.so' \
     '/vendor/lib64/libbase.so' \
     '/vendor/lib64/libcppbor*.so' \

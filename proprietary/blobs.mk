@@ -6,7 +6,6 @@ PRODUCT_COPY_FILES += \
     $(DEVICE_PATH)/prebuilt/modules/xiaomi_touch_goya.ko:recovery/root/lib/modules/xiaomi_touch_goya.ko \
     $(DEVICE_PATH)/prebuilt/modules/nt38771_touch_goya.ko:recovery/root/lib/modules/nt38771_touch_goya.ko \
     $(DEVICE_PATH)/prebuilt/modules/si_haptic.ko:recovery/root/lib/modules/si_haptic.ko \
-    $(DEVICE_PATH)/prebuilt/modules/scp.ko:recovery/root/lib/modules/scp.ko \
     $(DEVICE_PATH)/proprietary/vendor/firmware/aw8697_haptic.bin:recovery/root/vendor/firmware/aw8697_haptic.bin \
     $(DEVICE_PATH)/proprietary/vendor/firmware/aw8697_rtp_1.bin:recovery/root/vendor/firmware/aw8697_rtp_1.bin \
     $(DEVICE_PATH)/proprietary/odm/bin/hw/vendor.xiaomi.hw.touchfeature-service-recovery:recovery/root/system/bin/vendor.xiaomi.hw.touchfeature-service-recovery \
@@ -34,6 +33,8 @@ PRODUCT_COPY_FILES += \
     $(DEVICE_PATH)/proprietary/vendor/etc/vintf/manifest/android.hardware.security.secureclock-service.mitee.xml:recovery/root/vendor/etc/vintf/manifest/android.hardware.security.secureclock-service.mitee.xml \
     $(DEVICE_PATH)/proprietary/vendor/etc/vintf/manifest/android.hardware.security.sharedsecret-service.mitee.xml:recovery/root/vendor/etc/vintf/manifest/android.hardware.security.sharedsecret-service.mitee.xml \
     $(DEVICE_PATH)/proprietary/vendor/etc/vintf/manifest/android.hardware.weaver-service.nxp.xml:recovery/root/vendor/etc/vintf/manifest/android.hardware.weaver-service.nxp.xml \
+    $(DEVICE_PATH)/recovery/vintf/vendor-manifest.xml:recovery/root/vendor/manifest.xml \
+    $(DEVICE_PATH)/recovery/vintf/system-manifest.xml:recovery/root/system/manifest.xml \
     $(DEVICE_PATH)/proprietary/vendor/bin/tee-supplicant:recovery/root/vendor/bin/tee-supplicant \
     $(DEVICE_PATH)/proprietary/vendor/bin/hw/android.hardware.gatekeeper-service.mitee:recovery/root/vendor/bin/hw/android.hardware.gatekeeper-service.mitee \
     $(DEVICE_PATH)/proprietary/vendor/bin/hw/android.hardware.security.keymint@3.0-service.mitee:recovery/root/vendor/bin/hw/android.hardware.security.keymint@3.0-service.mitee \
@@ -82,6 +83,7 @@ PRODUCT_COPY_FILES += \
     $(DEVICE_PATH)/proprietary/vendor/lib64/libhardware.so:recovery/root/vendor/lib64/libhardware.so \
     $(DEVICE_PATH)/proprietary/vendor/lib64/libhardware_legacy.so:recovery/root/vendor/lib64/libhardware_legacy.so \
     $(DEVICE_PATH)/proprietary/vendor/lib64/libhidlbase.so:recovery/root/vendor/lib64/libhidlbase.so \
+    $(DEVICE_PATH)/proprietary/vendor/lib64/libjc_keymint_transport.nxp.so:recovery/root/vendor/lib64/libjc_keymint_transport.nxp.so \
     $(DEVICE_PATH)/proprietary/vendor/lib64/libjsoncpp.so:recovery/root/vendor/lib64/libjsoncpp.so \
     $(DEVICE_PATH)/proprietary/vendor/lib64/libkeymaster4support.so:recovery/root/vendor/lib64/libkeymaster4support.so \
     $(DEVICE_PATH)/proprietary/vendor/lib64/libkeymaster_messages.so:recovery/root/vendor/lib64/libkeymaster_messages.so \
@@ -97,18 +99,5 @@ PRODUCT_COPY_FILES += \
     $(DEVICE_PATH)/proprietary/vendor/lib64/libui.so:recovery/root/vendor/lib64/libui.so \
     $(DEVICE_PATH)/proprietary/vendor/lib64/libutils.so:recovery/root/vendor/lib64/libutils.so \
     $(DEVICE_PATH)/proprietary/vendor/lib64/vendor.xiaomi.hw.touchfeature-V1-ndk.so:recovery/root/vendor/lib64/vendor.xiaomi.hw.touchfeature-V1-ndk.so \
-    $(DEVICE_PATH)/proprietary/vendor/mitee/ta/2e8fade5-0c7a-46cc-810e6468baee66b9.ta:recovery/root/vendor/mitee/ta/2e8fade5-0c7a-46cc-810e6468baee66b9.ta \
-    $(DEVICE_PATH)/proprietary/vendor/mitee/ta/377ee4e8-af0e-474f-a9d636a9268fe85c.ta:recovery/root/vendor/mitee/ta/377ee4e8-af0e-474f-a9d636a9268fe85c.ta \
-    $(DEVICE_PATH)/proprietary/vendor/mitee/ta/3cfd7c3a-0781-4e9c-a5df0c8551559855.ta:recovery/root/vendor/mitee/ta/3cfd7c3a-0781-4e9c-a5df0c8551559855.ta \
     $(DEVICE_PATH)/proprietary/vendor/mitee/ta/4d573443-6a56-4272-ac6f2425af9ef9bb.ta:recovery/root/vendor/mitee/ta/4d573443-6a56-4272-ac6f2425af9ef9bb.ta \
-    $(DEVICE_PATH)/proprietary/vendor/mitee/ta/4e4ad239-24a4-42ac-941eec18e072750c.ta:recovery/root/vendor/mitee/ta/4e4ad239-24a4-42ac-941eec18e072750c.ta \
-    $(DEVICE_PATH)/proprietary/vendor/mitee/ta/68bcd09d-4101-4c0a-9552ed0af9ae16b2.ta:recovery/root/vendor/mitee/ta/68bcd09d-4101-4c0a-9552ed0af9ae16b2.ta \
-    $(DEVICE_PATH)/proprietary/vendor/mitee/ta/86f623f6-a299-4dfd-b560ffd3e5a62c29.ta:recovery/root/vendor/mitee/ta/86f623f6-a299-4dfd-b560ffd3e5a62c29.ta \
-    $(DEVICE_PATH)/proprietary/vendor/mitee/ta/88ce8e6b-8646-4092-bb78faf5b55ff4df.ta:recovery/root/vendor/mitee/ta/88ce8e6b-8646-4092-bb78faf5b55ff4df.ta \
-    $(DEVICE_PATH)/proprietary/vendor/mitee/ta/8aaaf201-2460-0000-7143fe4f7c823c80.ta:recovery/root/vendor/mitee/ta/8aaaf201-2460-0000-7143fe4f7c823c80.ta \
-    $(DEVICE_PATH)/proprietary/vendor/mitee/ta/8aaaf201-2460-0000-aabbccdd00000006.ta:recovery/root/vendor/mitee/ta/8aaaf201-2460-0000-aabbccdd00000006.ta \
-    $(DEVICE_PATH)/proprietary/vendor/mitee/ta/9811c1f6-47e3-5cea-ae6ef62ba433c4fd.ta:recovery/root/vendor/mitee/ta/9811c1f6-47e3-5cea-ae6ef62ba433c4fd.ta \
-    $(DEVICE_PATH)/proprietary/vendor/mitee/ta/dba51a17-0563-11e7-93b16fa7b0071a51.ta:recovery/root/vendor/mitee/ta/dba51a17-0563-11e7-93b16fa7b0071a51.ta \
-    $(DEVICE_PATH)/proprietary/vendor/mitee/ta/e97c270e-a5c4-4c58-bcd3384a2fa2539e.ta:recovery/root/vendor/mitee/ta/e97c270e-a5c4-4c58-bcd3384a2fa2539e.ta \
-    $(DEVICE_PATH)/proprietary/odm/mitee/ta/123af5d1-d6f5-cc54-f78fa19030b2e76a.ta:recovery/root/odm/mitee/ta/123af5d1-d6f5-cc54-f78fa19030b2e76a.ta \
-    $(DEVICE_PATH)/proprietary/odm/mitee/ta/d32d9207-6285-6d86-6cb98eaf46f6b4ec.ta:recovery/root/odm/mitee/ta/d32d9207-6285-6d86-6cb98eaf46f6b4ec.ta
+    $(DEVICE_PATH)/proprietary/vendor/mitee/ta/dba51a17-0563-11e7-93b16fa7b0071a51.ta:recovery/root/vendor/mitee/ta/dba51a17-0563-11e7-93b16fa7b0071a51.ta

@@ -294,6 +294,7 @@ vendor_library_patterns=(
     'libhardware.so'
     'libhardware_legacy.so'
     'libhidlbase.so'
+    'libjc_keymint_transport.nxp.so'
     'libjsoncpp.so'
     'libkeymaster*.so'
     'libkeymint*.so'
@@ -317,12 +318,21 @@ copy_glob_optional "$touch_src/lib64/vendor.xiaomi.hardware.framecapturemanager-
 
 copy_glob_optional "$vendor_src/mitee/ta/*.ta" \
     "${DEVICE_DIR}/proprietary/vendor/mitee/ta" 0644
-copy_glob_optional "$root/files/odm/mitee/ta/*.ta" \
-    "${DEVICE_DIR}/proprietary/odm/mitee/ta" 0644
-# MiFace is a ~29 MiB TEE face-unlock TA. Recovery never starts the face HAL,
-# and the TA container is almost incompressible, so keep it out of the device
-# tree instead of packing it into the recovery fragment.
-rm -f "${DEVICE_DIR}/proprietary/odm/mitee/ta/a3ba6512-6e0e-4065-93165e4a7d04ca08.ta"
+# Stage 2 needs only the AndroidKeymaster and Gatekeeper TAs. Weaver uses the
+# NXP eSE service and recovery never starts the face/touch TAs. Keeping the
+# unused containers out of the device tree also keeps the recovery fragment
+# inside the 64,000,000-byte vendor ramdisk limit.
+for ta in "${DEVICE_DIR}/proprietary/vendor/mitee/ta/"*.ta; do
+    [ -f "$ta" ] || continue
+    case "$(basename -- "$ta")" in
+        dba51a17-0563-11e7-93b16fa7b0071a51.ta|4d573443-6a56-4272-ac6f2425af9ef9bb.ta)
+            ;;
+        *)
+            rm -f "$ta"
+            ;;
+    esac
+done
+rm -rf "${DEVICE_DIR}/proprietary/odm/mitee/ta"
 copy_glob_optional "$vendor_src/firmware/aw8697_*.bin" \
     "${DEVICE_DIR}/proprietary/vendor/firmware" 0644
 

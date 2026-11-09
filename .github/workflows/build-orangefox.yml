@@ -511,8 +511,9 @@ jobs:
           inspect_disable_avb_dir="$(mktemp -d)"
           platform_cpio="$(mktemp)"
           recovery_cpio="$(mktemp)"
+          recovery_list="$(mktemp)"
           disable_avb_platform_cpio="$(mktemp)"
-          trap 'rm -rf "$avb_dir" "$inspect_dir" "$inspect_disable_avb_dir" "$platform_cpio" "$recovery_cpio" "$disable_avb_platform_cpio"' EXIT
+          trap 'rm -rf "$avb_dir" "$inspect_dir" "$inspect_disable_avb_dir" "$platform_cpio" "$recovery_cpio" "$recovery_list" "$disable_avb_platform_cpio"' EXIT
 
           ln -s "$image" "$avb_dir/vendor_boot.img"
           "$avbtool" verify_image --image "$avb_dir/vendor_boot.img"
@@ -533,6 +534,11 @@ jobs:
               raise SystemExit("repacked vendor_boot is not v4")
           if info.get("page_size") != 4096:
               raise SystemExit("repacked vendor_boot page size is not 4096")
+          ramdisk_size = info.get("vendor_ramdisk_size", 0)
+          if not 0 < ramdisk_size <= 64000000:
+              raise SystemExit(
+                  f"vendor ramdisk is {ramdisk_size} bytes; limit is 64,000,000")
+          print(f"vendor_ramdisk_size={ramdisk_size}", file=sys.stderr)
           platform = next((e for e in info["ramdisk_table"]
                            if e["type_name"] == "platform" and e["size"] > 0), None)
           recovery = next((e for e in info["ramdisk_table"]
@@ -573,22 +579,62 @@ jobs:
           done
 
           lz4 -d -f "$inspect_dir/$recovery_file" "$recovery_cpio" >/dev/null
-          cpio -it --quiet < "$recovery_cpio" | grep -Eq '^(\./)?system/bin/(recovery|twrp)$' || {
+          cpio -it --quiet < "$recovery_cpio" > "$recovery_list"
+          grep -Eq '^(\./)?system/bin/(recovery|twrp)$' "$recovery_list" || {
             echo "::error::recovery fragment has no recovery executable" >&2
             exit 1
           }
+
+          # The MTP gadget and the ZIP stack must survive the size trimming.
+          for path in system/etc/init/hw/init.rc system/bin/zip system/bin/ziptool \
+                      system/bin/unzip system/bin/zipinfo sbin/zip; do
+            grep -qx "$path" "$recovery_list" || {
+              echo "::error::recovery fragment is missing $path" >&2
+              exit 1
+            }
+          done
+          mkdir -p "$inspect_dir/recovery-root"
+          (
+            cd "$inspect_dir/recovery-root"
+            cpio -idm --quiet --no-absolute-filenames \
+              system/etc/init/hw/init.rc < "$recovery_cpio"
+          )
+          grep -qF -- 'functions/ffs.mtp' \
+            "$inspect_dir/recovery-root/system/etc/init/hw/init.rc" || {
+            echo "::error::recovery init.rc has no MTP gadget" >&2
+            exit 1
+          }
+          for path in system/bin/gnutar system/bin/gnused system/bin/magiskboot \
+                      sbin/gnutar sbin/gnused sbin/magiskboot lib/modules/scp.ko; do
+            if grep -qx "$path" "$recovery_list"; then
+              echo "::error::recovery fragment still contains optional file $path" >&2
+              exit 1
+            fi
+          done
+
           if [ "$REQUIRE_BLOBS" = "true" ]; then
-            for module in xiaomi_touch_goya.ko nt38771_touch_goya.ko si_haptic.ko scp.ko; do
-              cpio -it --quiet < "$recovery_cpio" | grep -qx "lib/modules/$module" || {
+            for module in xiaomi_touch_goya.ko nt38771_touch_goya.ko si_haptic.ko; do
+              grep -qx "lib/modules/$module" "$recovery_list" || {
                 echo "::error::recovery fragment is missing $module" >&2
                 exit 1
               }
             done
-            cpio -it --quiet < "$recovery_cpio" | \
-              grep -qx 'system/bin/vendor.xiaomi.hw.touchfeature-service-recovery' || {
+            grep -qx 'system/bin/vendor.xiaomi.hw.touchfeature-service-recovery' "$recovery_list" || {
               echo "::error::recovery fragment has no touch HAL" >&2
               exit 1
             }
+            for path in vendor/manifest.xml system/manifest.xml \
+                        vendor/lib64/libjc_keymint_transport.nxp.so; do
+              grep -qx "$path" "$recovery_list" || {
+                echo "::error::recovery fragment is missing $path" >&2
+                exit 1
+              }
+            done
+            ta_count="$(grep -cE '(^|/)(vendor|odm)/mitee/ta/.*\.ta$' "$recovery_list" || true)"
+            if [ "$ta_count" -ne 2 ]; then
+              echo "::error::recovery fragment has $ta_count TEE TAs; expected 2" >&2
+              exit 1
+            fi
           fi
 
           grep -qxF 'androidboot.vbmeta.device_state := "unlocked"' \
