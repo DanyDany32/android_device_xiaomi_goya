@@ -104,7 +104,8 @@ disable_avb_unsigned_image="${work_dir}/vendor_boot-disable-avb.img"
 disable_avb_bootconfig="${work_dir}/vendor_boot-disable-avb.bootconfig"
 disable_avb_inspect_dir="${work_dir}/vendor_boot-disable-avb-inspect"
 standard_inspect_dir="${work_dir}/vendor_boot-standard-inspect"
-disable_avb_verify_image="${work_dir}/vendor_boot.img"
+standard_avb_verify_dir="${work_dir}/avb-standard"
+disable_avb_verify_dir="${work_dir}/avb-disable"
 patched_dtb="${work_dir}/mt6899-goya-no-usb-offload.dtb"
 
 read_json_value() {
@@ -767,9 +768,17 @@ done
 
 test "$(stat -c %s "$OUTPUT_IMAGE")" = 117440512
 test "$(stat -c %s "$DISABLE_AVB_OUTPUT_IMAGE")" = 117440512
-cp -fp "$DISABLE_AVB_OUTPUT_IMAGE" "$disable_avb_verify_image"
-"$AVBTOOL" verify_image --image "$OUTPUT_IMAGE"
-"$AVBTOOL" verify_image --image "$disable_avb_verify_image"
+
+# avbtool's descriptor verification opens <image_dir>/<partition_name><ext>,
+# not the file passed to --image. The product directory still contains the
+# OrangeFox recovery-only vendor_boot.img at this point, so verifying the
+# release image in place would compare the hash against that stale file.
+# Verify isolated copies named after the partition instead.
+mkdir -p "$standard_avb_verify_dir" "$disable_avb_verify_dir"
+cp -fp "$OUTPUT_IMAGE" "${standard_avb_verify_dir}/vendor_boot.img"
+cp -fp "$DISABLE_AVB_OUTPUT_IMAGE" "${disable_avb_verify_dir}/vendor_boot.img"
+"$AVBTOOL" verify_image --image "${standard_avb_verify_dir}/vendor_boot.img"
+"$AVBTOOL" verify_image --image "${disable_avb_verify_dir}/vendor_boot.img"
 verify_embedded_magisk_addon "$OUTPUT_IMAGE" standard
 verify_embedded_magisk_addon "$DISABLE_AVB_OUTPUT_IMAGE" disable-avb
 
