@@ -422,10 +422,30 @@ if [ -f "$keymint_service" ]; then
         libpuresoftkeymasterdevice.so \
         libcppcose_rkp.so \
         libtrusty.so \
-        libjsoncpp.so; do
+        libjsoncpp.so \
+        libc++.so; do
         require_stage2_file "${DEVICE_DIR}/proprietary/vendor/lib64/${library}" \
             "KeyMint runtime library is missing: ${library}"
     done
+    # The stock Android 16 services are BIND_NOW and require the vendor libc++
+    # ABI (std::__libcpp_verbose_abort is absent from OrangeFox's libc++).
+    libcxx_blob="${DEVICE_DIR}/proprietary/vendor/lib64/libc++.so"
+    if [ -f "$libcxx_blob" ]; then
+        libcxx_hash="$(sha256sum "$libcxx_blob" | awk '{print $1}')"
+        [ "$libcxx_hash" = "794eb8fafd7be35da3725e9ec0b15189c6f4f2544f5b78afd8a647dde5b69195" ] || \
+            fail "unexpected SHA-256 for vendor libc++: ${libcxx_hash}"
+        # Process substitution keeps `set -o pipefail` from turning the
+        # SIGPIPE raised when grep -q exits early into a false failure.
+        if ! grep -qx '_ZNSt3__122__libcpp_verbose_abortEPKcz' \
+                < <(strings -a "$libcxx_blob"); then
+            fail "vendor libc++ does not export __libcpp_verbose_abort"
+        fi
+        check_contains "${DEVICE_DIR}/proprietary/blobs.mk" \
+            "proprietary/vendor/lib64/libc++.so:recovery/root/vendor/lib64/libc++.so" \
+            "vendor libc++ is not copied into the recovery fragment"
+        check_contains "${DEVICE_DIR}/tools/import-dump.sh" "libc++.so" \
+            "vendor libc++ is not imported by import-dump.sh"
+    fi
     if [ -f "$gatekeeper_service" ]; then
         require_stage2_file \
             "${vendor_manifest_dir}/android.hardware.gatekeeper-service.mitee.xml" \

@@ -263,8 +263,12 @@ done
 # Weaver stack and the touch NDK/support libraries, otherwise they fail with
 # "library not found" when init starts them.
 #
-# Platform libraries (libc, libm, libdl, libc++, libbinder_ndk, liblog,
-# libsync, libvndksupport) stay out of the list: recovery provides its own.
+# Platform libraries (libc, libm, libdl, libbinder_ndk, liblog, libsync,
+# libvndksupport) stay out of the list: recovery provides its own. libc++.so
+# is the exception: the stock Android 16 vendor binaries are BIND_NOW and
+# reference std::__libcpp_verbose_abort, which OrangeFox's recovery libc++
+# does not export. Ship the stock vendor libc++ in the recovery fragment,
+# exactly as the validated R6 image did.
 vendor_library_patterns=(
     'android.frameworks.sensorservice-*.so'
     'android.hardware.common-*.so'
@@ -280,6 +284,7 @@ vendor_library_patterns=(
     'ese_weaver*.so'
     'lib_android_keymaster*.so'
     'libbase.so'
+    'libc++.so'
     'libcppbor*.so'
     'libcppcose*.so'
     'libcrypto.so'

@@ -3,8 +3,8 @@
 # their device nodes and TA files are present.
 #
 # The blob importer places the stock binaries below /vendor/bin and the
-# MiTEE/NXP libraries below /vendor/lib64, preserving the paths they expect
-# from the running system.
+# MiTEE/NXP libraries (including the vendor libc++) below /vendor/lib64,
+# preserving the paths they expect from the running system.
 
 service tee-supplicant /vendor/bin/tee-supplicant
     class core

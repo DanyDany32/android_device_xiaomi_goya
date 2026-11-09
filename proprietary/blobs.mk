@@ -71,6 +71,7 @@ PRODUCT_COPY_FILES += \
     $(DEVICE_PATH)/proprietary/vendor/lib64/ese_weaver.nxp.so:recovery/root/vendor/lib64/ese_weaver.nxp.so \
     $(DEVICE_PATH)/proprietary/vendor/lib64/lib_android_keymaster_keymint_utils.so:recovery/root/vendor/lib64/lib_android_keymaster_keymint_utils.so \
     $(DEVICE_PATH)/proprietary/vendor/lib64/libbase.so:recovery/root/vendor/lib64/libbase.so \
+    $(DEVICE_PATH)/proprietary/vendor/lib64/libc++.so:recovery/root/vendor/lib64/libc++.so \
     $(DEVICE_PATH)/proprietary/vendor/lib64/libcppbor.so:recovery/root/vendor/lib64/libcppbor.so \
     $(DEVICE_PATH)/proprietary/vendor/lib64/libcppbor_external.so:recovery/root/vendor/lib64/libcppbor_external.so \
     $(DEVICE_PATH)/proprietary/vendor/lib64/libcppcose_rkp.so:recovery/root/vendor/lib64/libcppcose_rkp.so \

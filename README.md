@@ -22,9 +22,12 @@ composta da:
 | Stage 1 | boot, display, touch, ADB, MTP, fastbootd | input importati dal firmware OS3.0.311.0 |
 | Stage 2 | decrypt FBE/Metadata con KeyMint/Gatekeeper/Weaver e TouchReport | blob TEE e dipendenze importati; decrypt FBE validato sul dispositivo (protector secdis) |
 
-Senza i blob ODM/TEE la build funziona comunque e produce una immagine Stage 1
-senza decrypt. `tools/verify-build-inputs.sh --require-blobs` serve a imporre
-la presenza dei blob per una release completa.
+Un albero senza i servizi Stage 2 (health-aidl, KeyMint, Gatekeeper) produce
+una immagine Stage 1 senza decrypt. Quando questi servizi sono presenti, il
+repack richiede la libc++ vendor e si ferma se manca, perché sono BIND_NOW e
+referenziano `std::__libcpp_verbose_abort`.
+`tools/verify-build-inputs.sh --require-blobs` impone la presenza dei blob per
+una release completa.
 
 ## Struttura
 
@@ -201,7 +204,10 @@ Il device tree include già:
   Gatekeeper MiTEE e (se presente) Weaver NXP;
 - bind di `/persist` e alias ODM in `init.recovery.mt6899.rc`;
 - fstab `userdata` con `aes-256-hctr2` e key directory metadata;
-- librerie touch e servizio TouchReport per la UI.
+- librerie touch e servizio TouchReport per la UI;
+- libc++ vendor stock (`vendor/lib64/libc++.so`) nel frammento recovery: i
+  binari Android 16 di KeyMint/Gatekeeper/health sono BIND_NOW e richiedono
+  `std::__libcpp_verbose_abort`, che la libc++ di OrangeFox non esporta.
 
 Per completare il decrypt servono i TA MiTEE e le librerie TEE importati dal
 dump. Il TA MiFace (~29 MiB, face unlock TEE) viene invece scartato: recovery
@@ -233,6 +239,7 @@ errore.
 | ADB/MTP assenti | `mtu3.ko`, `xhci-mtk-hcd-v2.ko`, `extcon-mtk-usb.ko` mancanti dal platform fragment |
 | Decrypt non parte | KeyMint/TA MiTEE assenti, `/persist` non montato, manifest VINTF sotto `/system` |
 | Decrypt fallisce sul protector Weaver | eSE/OMAPI non disponibili in recovery; verificare che esista un protector `.secdis` con lo stesso salt e che la patch vold sia applicata (`findSecdiscFallback` in `KeystoreInfo.cpp`) |
+| KeyMint/Gatekeeper/health non partono (`__libcpp_verbose_abort`) | manca `vendor/lib64/libc++.so` nel frammento recovery: verificare la regola in `proprietary/blobs.mk` e l'import in `tools/import-dump.sh` |
 | Fastbootd non cambia slot | servizio AIDL BootControl stock assente dal platform fragment |
 | Build senza moduli display | `prebuilt/vendor-boot/` non importato |
 

@@ -188,8 +188,14 @@ fi
 "$LZ4" -d -f "$RECOVERY_LZ4" "$recovery_cpio" >/dev/null
 decompress_ramdisk "$STOCK_RAMDISK" "$platform_cpio"
 
-if cpio -it --quiet < "$recovery_cpio" | \
-        grep -Eq '^(\./)?(system|vendor)/etc/vintf/manifest/android\.hardware\.health-service\.example\.xml$'; then
+# Keep one authoritative listing: several checks below inspect the archive,
+# and a single cpio pass avoids both repeated work and pipefail/SIGPIPE
+# ambiguities when grep exits early.
+recovery_listing="${work_dir}/recovery.list"
+cpio -it --quiet < "$recovery_cpio" > "$recovery_listing"
+
+if grep -Eq '^(\./)?(system|vendor)/etc/vintf/manifest/android\.hardware\.health-service\.example\.xml$' \
+        "$recovery_listing"; then
     echo "recovery ramdisk still declares the unavailable AIDL Health service" >&2
     exit 1
 fi
@@ -198,7 +204,7 @@ verify_recovery_elf() {
     local cpio_file="$1" archive_path="$2" extracted_file
 
     extracted_file="${work_dir}/$(basename "$archive_path")"
-    if ! cpio -it --quiet < "$cpio_file" | grep -E "^(\./)?${archive_path}$" >/dev/null; then
+    if ! grep -Eq "^(\./)?${archive_path}$" "$recovery_listing"; then
         echo "recovery ramdisk is missing required ELF: $archive_path" >&2
         exit 1
     fi
@@ -215,15 +221,45 @@ PY
 
 verify_recovery_elf "$recovery_cpio" system/lib64/libprocessgroup_setup.so
 
-module_count="$(cpio -it --quiet < "$recovery_cpio" | awk '/^lib\/modules\/.*\.ko$/ { count++ } END { print count + 0 }')"
+# KeyMint, Gatekeeper and the AIDL health HAL are BIND_NOW Android 16
+# binaries. They reference std::__libcpp_verbose_abort, which OrangeFox's
+# recovery libc++ does not export; when one of them is present, the stock
+# vendor libc++ must travel in the recovery fragment so
+# /vendor/lib64/libc++.so wins over the system copy. A Stage 1 tree without
+# these services does not need it.
+libcxx_required=0
+for consumer in \
+    vendor/bin/hw/android.hardware.security.keymint@3.0-service.mitee \
+    vendor/bin/hw/android.hardware.gatekeeper-service.mitee \
+    system/bin/android.hardware.health-service.example_recovery; do
+    if grep -Eq "^(\./)?${consumer}$" "$recovery_listing"; then
+        libcxx_required=1
+        break
+    fi
+done
+if [ "$libcxx_required" -eq 1 ]; then
+    verify_recovery_elf "$recovery_cpio" vendor/lib64/libc++.so
+    libcxx_file="${work_dir}/libc++.so"
+    # Process substitution avoids a pipefail false failure: grep -q exits as
+    # soon as it finds the symbol, which sends SIGPIPE to strings.
+    if ! grep -qx '_ZNSt3__122__libcpp_verbose_abortEPKcz' \
+            < <(strings -a "$libcxx_file"); then
+        echo "recovery fragment libc++ does not export __libcpp_verbose_abort" >&2
+        exit 1
+    fi
+else
+    echo "note: recovery fragment has no stock Android 16 KeyMint/Gatekeeper" \
+        "or AIDL health binary; vendor libc++ check skipped (Stage 1 build)" >&2
+fi
+
+module_count="$(awk '/^lib\/modules\/.*\.ko$/ { count++ } END { print count + 0 }' "$recovery_listing")"
 if [ "$module_count" -gt 7 ]; then
     echo "recovery fragment still contains $module_count modules; expected at most 7" >&2
     exit 1
 fi
 
 if [ -s "${PREBUILT_DIR}/modules.load.recovery" ] && \
-        ! cpio -it --quiet < "$recovery_cpio" | \
-            grep -Eq '^(\./)?lib/modules/modules\.load\.recovery$'; then
+        ! grep -Eq '^(\./)?lib/modules/modules\.load\.recovery$' "$recovery_listing"; then
     echo "recovery fragment is missing the stock modules.load.recovery" >&2
     echo "check that fox_callback.sh copied it from prebuilt/vendor-boot" >&2
     exit 1
