@@ -134,7 +134,9 @@ rm -f \
 if [ ! -f "$ramdisk/system/bin/ziptool" ]; then
     rm -f "$ramdisk/system/bin/unzip" "$ramdisk/system/bin/zipinfo"
 fi
-if [ ! -f "$ramdisk/system/bin/zip" ]; then
+# The Info-ZIP binary may be staged as a regular file in /sbin and moved to
+# /system/bin by the relocation loop below. Only drop a dangling sbin symlink.
+if [ ! -f "$ramdisk/system/bin/zip" ] && [ ! -f "$ramdisk/sbin/zip" ]; then
     rm -f "$ramdisk/sbin/zip"
 fi
 
