@@ -194,21 +194,37 @@ decompress_ramdisk "$STOCK_RAMDISK" "$platform_cpio"
 recovery_listing="${work_dir}/recovery.list"
 cpio -it --quiet < "$recovery_cpio" > "$recovery_listing"
 
-if grep -Eq '^(\./)?(system|vendor)/etc/vintf/manifest/android\.hardware\.health-service\.example\.xml$' \
-        "$recovery_listing"; then
+# Match archive paths literally. Paths such as vendor/lib64/libc++.so contain
+# ERE metacharacters ("++"), so grep -E would interpret them as quantifiers
+# and falsely report the file as missing.
+archive_has_path() {
+    local listing="$1" archive_path="$2"
+
+    grep -Fxq -- "$archive_path" "$listing" || \
+        grep -Fxq -- "./${archive_path}" "$listing"
+}
+
+if archive_has_path "$recovery_listing" \
+        system/etc/vintf/manifest/android.hardware.health-service.example.xml || \
+   archive_has_path "$recovery_listing" \
+        vendor/etc/vintf/manifest/android.hardware.health-service.example.xml; then
     echo "recovery ramdisk still declares the unavailable AIDL Health service" >&2
     exit 1
 fi
 
 verify_recovery_elf() {
-    local cpio_file="$1" archive_path="$2" extracted_file
+    local cpio_file="$1" archive_path="$2" extracted_file extract_path
 
     extracted_file="${work_dir}/$(basename "$archive_path")"
-    if ! grep -Eq "^(\./)?${archive_path}$" "$recovery_listing"; then
+    if grep -Fxq -- "$archive_path" "$recovery_listing"; then
+        extract_path="$archive_path"
+    elif grep -Fxq -- "./${archive_path}" "$recovery_listing"; then
+        extract_path="./${archive_path}"
+    else
         echo "recovery ramdisk is missing required ELF: $archive_path" >&2
         exit 1
     fi
-    cpio -i --quiet --to-stdout "$archive_path" < "$cpio_file" > "$extracted_file"
+    cpio -i --quiet --to-stdout "$extract_path" < "$cpio_file" > "$extracted_file"
     python3 - "$extracted_file" "$archive_path" <<'PY'
 import pathlib
 import sys
@@ -232,7 +248,7 @@ for consumer in \
     vendor/bin/hw/android.hardware.security.keymint@3.0-service.mitee \
     vendor/bin/hw/android.hardware.gatekeeper-service.mitee \
     system/bin/android.hardware.health-service.example_recovery; do
-    if grep -Eq "^(\./)?${consumer}$" "$recovery_listing"; then
+    if archive_has_path "$recovery_listing" "$consumer"; then
         libcxx_required=1
         break
     fi
@@ -259,7 +275,7 @@ if [ "$module_count" -gt 7 ]; then
 fi
 
 if [ -s "${PREBUILT_DIR}/modules.load.recovery" ] && \
-        ! grep -Eq '^(\./)?lib/modules/modules\.load\.recovery$' "$recovery_listing"; then
+        ! archive_has_path "$recovery_listing" lib/modules/modules.load.recovery; then
     echo "recovery fragment is missing the stock modules.load.recovery" >&2
     echo "check that fox_callback.sh copied it from prebuilt/vendor-boot" >&2
     exit 1
