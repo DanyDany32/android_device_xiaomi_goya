@@ -119,18 +119,17 @@ rm -f \
     "$ramdisk/system/lib64/libprotobuf-cpp-full.so" \
     "$ramdisk/system/lib64/libsnapshot.so"
 
-# Keep the ZIP stack (zip + ziptool with unzip/zipinfo symlinks): recovery
-# backups and ZIP installation need it. Drop the large optional GNU/magisk
-# tools; toybox already provides tar and sed, and the 64,000,000-byte vendor
-# ramdisk leaves no room for the rest. Remove both the target and its /sbin
-# symlink so the UI never sees a dangling command.
+# Keep the ZIP stack (zip + ziptool with unzip/zipinfo symlinks) and
+# magiskboot: recovery backups, ZIP installation and OrangeFox's Magisk
+# integration need them. Drop the large optional GNU tools; toybox already
+# provides tar and sed, and the 64,000,000-byte vendor ramdisk has very
+# little headroom. Remove both the target and its /sbin symlink so the UI
+# never sees a dangling command.
 rm -f \
     "$ramdisk/system/bin/gnutar" \
     "$ramdisk/system/bin/gnused" \
-    "$ramdisk/system/bin/magiskboot" \
     "$ramdisk/sbin/gnutar" \
-    "$ramdisk/sbin/gnused" \
-    "$ramdisk/sbin/magiskboot"
+    "$ramdisk/sbin/gnused"
 if [ ! -f "$ramdisk/system/bin/ziptool" ]; then
     rm -f "$ramdisk/system/bin/unzip" "$ramdisk/system/bin/zipinfo"
 fi

@@ -245,8 +245,13 @@ quel file non dichiara il gadget MTP. Il template aggiunge `ffs.mtp`, il mount
 `/dev/usb-ffs/mtp` e la configurazione `mtp,adb` con due funzioni.
 
 La build mantiene lo stack ZIP completo (`system/bin/zip`, `system/bin/ziptool`,
-symlink `unzip`/`zipinfo` e `sbin/zip`) e rimuove `gnutar`, `gnused`,
-`magiskboot` e `scp.ko`, che non servono in recovery e occupano spazio prezioso.
+symlink `unzip`/`zipinfo` e `sbin/zip`) e `magiskboot`
+(`system/bin/magiskboot` con symlink `sbin/magiskboot`) per l'integrazione
+Magisk e la manipolazione delle immagini di boot. Rimuove `gnutar`, `gnused` e
+`scp.ko`, che non servono in recovery e occupano spazio prezioso: `tar` e `sed`
+restano disponibili via toybox. `magiskboot` costa circa 750 KB compressi e
+lascia ~342 KB di margine sotto il limite di 64.000.000 byte del vendor
+ramdisk; per questo va verificato il boot sul dispositivo dopo ogni modifica.
 
 Validazione sul dispositivo: MTP espone `/data/media/0`, `zip`, `unzip` e
 `zipinfo` funzionano, e il boot Android successivo arriva a

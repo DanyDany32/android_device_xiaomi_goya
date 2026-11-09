@@ -585,9 +585,11 @@ jobs:
             exit 1
           }
 
-          # The MTP gadget and the ZIP stack must survive the size trimming.
+          # The MTP gadget, the ZIP stack and magiskboot must survive the size
+          # trimming.
           for path in system/etc/init/hw/init.rc system/bin/zip system/bin/ziptool \
-                      system/bin/unzip system/bin/zipinfo sbin/zip; do
+                      system/bin/unzip system/bin/zipinfo sbin/zip \
+                      system/bin/magiskboot sbin/magiskboot; do
             grep -qx "$path" "$recovery_list" || {
               echo "::error::recovery fragment is missing $path" >&2
               exit 1
@@ -604,8 +606,8 @@ jobs:
             echo "::error::recovery init.rc has no MTP gadget" >&2
             exit 1
           }
-          for path in system/bin/gnutar system/bin/gnused system/bin/magiskboot \
-                      sbin/gnutar sbin/gnused sbin/magiskboot lib/modules/scp.ko; do
+          for path in system/bin/gnutar system/bin/gnused \
+                      sbin/gnutar sbin/gnused lib/modules/scp.ko; do
             if grep -qx "$path" "$recovery_list"; then
               echo "::error::recovery fragment still contains optional file $path" >&2
               exit 1
