@@ -34,6 +34,16 @@ service goya-haptics-loader /system/bin/load-haptics-module.sh
     group root input system
     seclabel u:r:recovery:s0
 
+# Copy the Magisk installer APK out of the vendor_boot tail. The slot-specific
+# by-name symlink can appear several seconds after early-boot, so run it as a
+# background oneshot service instead of blocking the boot trigger with exec.
+service magisk-addon-setup /system/bin/magisk-addon-setup.sh
+    disabled
+    oneshot
+    user root
+    group root system
+    seclabel u:r:recovery:s0
+
 # fastbootd waits for the AIDL health HAL android.hardware.health.IHealth/default
 # before it opens functionfs. The HIDL 2.1 service alone is not enough, so keep
 # the compact stock recovery health service and run it with the stock libc++
@@ -109,8 +119,9 @@ on init
 on early-boot
     # The Magisk installer APK is stored in the vendor_boot partition tail
     # because the 64 MB vendor ramdisk has no room for it. Copy it to the path
-    # used by the OrangeFox addon before the recovery UI starts.
-    exec - root root -- /system/bin/magisk-addon-setup.sh
+    # used by the OrangeFox addon while the recovery UI starts; the service
+    # polls for the block device, so do not wait for it here.
+    start magisk-addon-setup
     exec_start goya-touch-loader
     start goya-touchfeature
     exec_start goya-touch-wait
